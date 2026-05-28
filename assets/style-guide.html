@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>taco — style guide</title>
+<meta name="description" content="Brand colors, type, and logo usage for taco." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<style>
+  :root {
+    --navy:      #0A1F44;
+    --navy-2:    #0E2A5C;
+    --yellow:    #F5C242;
+    --jira:      #2684FF;
+    --jira-dark: #0052CC;
+    --red:       #FF5630;
+    --green:     #36B37E;
+    --muted:     #9BB0D6;
+    --text:      #E8EEFA;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--navy);
+    color: var(--text);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(38, 132, 255, 0.10), transparent 40%),
+      radial-gradient(circle at 80% 100%, rgba(245, 194, 66, 0.08), transparent 45%),
+      var(--navy);
+  }
+  .container {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+  header.hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+  header.hero .logo { width: 140px; height: auto; flex-shrink: 0; }
+  header.hero h1 {
+    font-size: 28px;
+    margin: 0 0 4px;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+  header.hero h1 strong { color: var(--yellow); }
+  header.hero p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  section { margin-top: 56px; }
+  h2 {
+    font-size: 14px;
+    color: var(--yellow);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  h2::before { content: "//"; color: var(--muted); }
+  h2 + .desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 20px;
+    max-width: 640px;
+  }
+
+  /* Color groups */
+  .group-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 22px 0 10px;
+  }
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .swatch {
+    border: 1px solid rgba(155, 176, 214, 0.18);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--navy-2);
+  }
+  .swatch .chip {
+    height: 110px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 12px;
+  }
+  .swatch .role {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.35);
+    color: #fff;
+    padding: 3px 7px;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .swatch.light .role { background: rgba(255,255,255,0.55); color: #111; }
+  .swatch .meta {
+    padding: 12px 14px 14px;
+    border-top: 1px solid rgba(155, 176, 214, 0.12);
+  }
+  .swatch .name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 2px;
+  }
+  .swatch .var {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 0 0 8px;
+    letter-spacing: 1px;
+  }
+  .swatch .hex {
+    font-size: 13px;
+    color: var(--yellow);
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .swatch .usage {
+    font-size: 11px;
+    color: var(--muted);
+    margin: 6px 0 0;
+    line-height: 1.5;
+  }
+
+  /* Logo block */
+  .logo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  .logo-tile {
+    border: 1px solid rgba(155, 176, 214, 0.18);
+    border-radius: 6px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+  }
+  .logo-tile.dark { background: var(--navy-2); }
+  .logo-tile.yellow { background: var(--yellow); }
+  .logo-tile.light { background: #F5EFE0; }
+  .logo-tile svg { width: 80%; height: auto; max-width: 280px; }
+  .logo-caption {
+    display: block;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 8px;
+  }
+
+  /* Typography block */
+  .type-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 16px 24px;
+    align-items: baseline;
+  }
+  .type-label {
+    font-size: 11px;
+    color: var(--yellow);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .type-sample-h1 { font-size: 28px; font-weight: 400; color: var(--text); letter-spacing: 1px; }
+  .type-sample-h1 strong { color: var(--yellow); font-weight: 700; }
+  .type-sample-h2 { font-size: 14px; color: var(--yellow); letter-spacing: 4px; text-transform: uppercase; }
+  .type-sample-h3 { font-size: 15px; color: var(--text); font-weight: 700; }
+  .type-sample-body { font-size: 13px; color: var(--muted); }
+  .type-sample-mono { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+
+  /* Voice */
+  .voice {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .voice .col {
+    border: 1px solid rgba(155, 176, 214, 0.18);
+    border-radius: 6px;
+    padding: 18px 20px;
+    background: rgba(14, 42, 92, 0.45);
+  }
+  .voice .col h4 {
+    margin: 0 0 10px;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .voice .col.do h4 { color: var(--green); }
+  .voice .col.dont h4 { color: var(--red); }
+  .voice ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+  .voice li { margin-bottom: 6px; }
+
+  footer {
+    margin-top: 80px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+  footer .dots { display: inline-flex; gap: 6px; margin: 0 10px; vertical-align: middle; }
+  footer .dot { width: 6px; height: 6px; border-radius: 50%; }
+  footer .dot.r { background: var(--red); }
+  footer .dot.g { background: var(--green); }
+  footer .dot.y { background: var(--yellow); }
+
+  @media (max-width: 640px) {
+    header.hero { flex-direction: column; text-align: center; }
+    .type-grid { grid-template-columns: 1fr; }
+    .voice { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="hero">
+    <svg class="logo" viewBox="0 0 400 265" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="taco logo">
+      <polygon points="60,210 200,80 340,210" fill="none" stroke="#F5C242" stroke-width="6"/>
+      <polygon points="60,210 200,80 340,210" fill="#F5C242" opacity="0.08"/>
+      <rect x="180" y="135" width="40" height="40" fill="#2684FF"/>
+      <path d="M 200 175 q 0 24 -22 24" fill="none" stroke="#2684FF" stroke-width="8" stroke-linecap="square"/>
+      <circle cx="140" cy="190" r="5" fill="#FF5630"/>
+      <circle cx="260" cy="190" r="5" fill="#36B37E"/>
+      <text x="200" y="255" font-family="'Courier New', monospace" font-size="40" font-weight="700" text-anchor="middle" fill="#F5C242" letter-spacing="6">TACO</text>
+    </svg>
+    <div>
+      <h1><strong>taco</strong> style guide</h1>
+      <p>A soft shell around Jira. Colors, type, and the wrapper around them.</p>
+    </div>
+  </header>
+
+  <!-- COLORS -->
+  <section>
+    <h2>Colors</h2>
+    <p class="desc">Navy is the kitchen, yellow is the shell, and blue is the filling. Everything else is garnish.</p>
+
+    <div class="group-label">Primary</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip" style="background: #0A1F44;"><span class="role">BG</span></div>
+        <div class="meta">
+          <p class="name">Navy</p>
+          <p class="var">--navy</p>
+          <p class="hex">#0A1F44</p>
+          <p class="usage">Default page background. The plate everything sits on.</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="chip" style="background: #F5C242;"><span class="role">BRAND</span></div>
+        <div class="meta">
+          <p class="name">Taco Yellow</p>
+          <p class="var">--yellow</p>
+          <p class="hex">#F5C242</p>
+          <p class="usage">The shell. Used for the logo, headlines, primary CTAs, and key emphasis.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="group-label">Filling — Jira blue</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip" style="background: #2684FF;"><span class="role">ACCENT</span></div>
+        <div class="meta">
+          <p class="name">Jira Blue</p>
+          <p class="var">--jira</p>
+          <p class="hex">#2684FF</p>
+          <p class="usage">The thing we wrap. Used inside the logo and where Jira's identity peeks through.</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #0052CC;"><span class="role">ACCENT</span></div>
+        <div class="meta">
+          <p class="name">Jira Blue (dark)</p>
+          <p class="var">--jira-dark</p>
+          <p class="hex">#0052CC</p>
+          <p class="usage">Hover/active states on Jira-blue elements.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="group-label">Garnish</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip" style="background: #FF5630;"><span class="role">SALSA</span></div>
+        <div class="meta">
+          <p class="name">Salsa Red</p>
+          <p class="var">--red</p>
+          <p class="hex">#FF5630</p>
+          <p class="usage">Warnings, placeholder markers, the red dot in the logo.</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #36B37E;"><span class="role">CILANTRO</span></div>
+        <div class="meta">
+          <p class="name">Cilantro Green</p>
+          <p class="var">--green</p>
+          <p class="hex">#36B37E</p>
+          <p class="usage">Success states, positive guidance, the green dot in the logo.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="group-label">Neutrals</div>
+    <div class="swatches">
+      <div class="swatch">
+        <div class="chip" style="background: #0E2A5C;"><span class="role">SURFACE</span></div>
+        <div class="meta">
+          <p class="name">Navy 2</p>
+          <p class="var">--navy-2</p>
+          <p class="hex">#0E2A5C</p>
+          <p class="usage">Cards, panels, and any surface raised slightly above the background.</p>
+        </div>
+      </div>
+      <div class="swatch">
+        <div class="chip" style="background: #9BB0D6;"><span class="role" style="background: rgba(255,255,255,0.6); color:#111;">MUTED</span></div>
+        <div class="meta">
+          <p class="name">Muted Slate</p>
+          <p class="var">--muted</p>
+          <p class="hex">#9BB0D6</p>
+          <p class="usage">Secondary copy, captions, comment-style framing ("// …").</p>
+        </div>
+      </div>
+      <div class="swatch light">
+        <div class="chip" style="background: #E8EEFA;"><span class="role">TEXT</span></div>
+        <div class="meta">
+          <p class="name">Soft White</p>
+          <p class="var">--text</p>
+          <p class="hex">#E8EEFA</p>
+          <p class="usage">Body text on dark surfaces. Slightly cool so it doesn't fight the navy.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TYPOGRAPHY -->
+  <section>
+    <h2>Typography</h2>
+    <p class="desc">One family: the system monospace stack. Code-flavored, friendly enough to hold a tagline.</p>
+    <div style="font-size: 12px; color: var(--muted); margin-bottom: 18px; letter-spacing: 1px;">
+      ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace
+    </div>
+
+    <div class="type-grid">
+      <div class="type-label">Display / H1</div>
+      <div class="type-sample-h1">A <strong>soft shell</strong> around Jira.</div>
+
+      <div class="type-label">Section / H2</div>
+      <div class="type-sample-h2">// why taco</div>
+
+      <div class="type-label">Card title / H3</div>
+      <div class="type-sample-h3">Spice level: mild</div>
+
+      <div class="type-label">Body</div>
+      <div class="type-sample-body">Same dull flavor. taco doesn't make Jira exciting; it just makes it easier to swallow.</div>
+
+      <div class="type-label">Meta / caption</div>
+      <div class="type-sample-mono">CHROME · WEB STORE</div>
+    </div>
+  </section>
+
+  <!-- LOGO -->
+  <section>
+    <h2>Logo</h2>
+    <p class="desc">Triangle = soft shell. Blue square + arc = the Jira "J" peeking out. Two dots = a little salsa, a little cilantro. Don't crop the wordmark off the triangle; they're one unit.</p>
+
+    <div class="logo-grid">
+      <div>
+        <div class="logo-tile dark">
+          <svg viewBox="0 0 400 265" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polygon points="60,210 200,80 340,210" fill="none" stroke="#F5C242" stroke-width="6"/>
+            <polygon points="60,210 200,80 340,210" fill="#F5C242" opacity="0.08"/>
+            <rect x="180" y="135" width="40" height="40" fill="#2684FF"/>
+            <path d="M 200 175 q 0 24 -22 24" fill="none" stroke="#2684FF" stroke-width="8" stroke-linecap="square"/>
+            <circle cx="140" cy="190" r="5" fill="#FF5630"/>
+            <circle cx="260" cy="190" r="5" fill="#36B37E"/>
+            <text x="200" y="255" font-family="'Courier New', monospace" font-size="40" font-weight="700" text-anchor="middle" fill="#F5C242" letter-spacing="6">TACO</text>
+          </svg>
+        </div>
+        <span class="logo-caption">On Navy (default)</span>
+      </div>
+      <div>
+        <div class="logo-tile light">
+          <svg viewBox="0 0 400 265" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polygon points="60,210 200,80 340,210" fill="none" stroke="#2A1F0E" stroke-width="6"/>
+            <polygon points="60,210 200,80 340,210" fill="#F5C242" opacity="0.5"/>
+            <rect x="180" y="135" width="40" height="40" fill="#2684FF"/>
+            <path d="M 200 175 q 0 24 -22 24" fill="none" stroke="#2684FF" stroke-width="8" stroke-linecap="square"/>
+            <circle cx="140" cy="190" r="5" fill="#FF5630"/>
+            <circle cx="260" cy="190" r="5" fill="#36B37E"/>
+            <text x="200" y="255" font-family="'Courier New', monospace" font-size="40" font-weight="700" text-anchor="middle" fill="#2A1F0E" letter-spacing="6">TACO</text>
+          </svg>
+        </div>
+        <span class="logo-caption">On Light</span>
+      </div>
+      <div>
+        <div class="logo-tile yellow">
+          <svg viewBox="0 0 400 265" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <polygon points="60,210 200,80 340,210" fill="none" stroke="#0A1F44" stroke-width="6"/>
+            <polygon points="60,210 200,80 340,210" fill="#0A1F44" opacity="0.06"/>
+            <rect x="180" y="135" width="40" height="40" fill="#0052CC"/>
+            <path d="M 200 175 q 0 24 -22 24" fill="none" stroke="#0052CC" stroke-width="8" stroke-linecap="square"/>
+            <circle cx="140" cy="190" r="5" fill="#FF5630"/>
+            <circle cx="260" cy="190" r="5" fill="#0A1F44"/>
+            <text x="200" y="255" font-family="'Courier New', monospace" font-size="40" font-weight="700" text-anchor="middle" fill="#0A1F44" letter-spacing="6">TACO</text>
+          </svg>
+        </div>
+        <span class="logo-caption">On Yellow</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- VOICE -->
+  <section>
+    <h2>Voice &amp; tone</h2>
+    <p class="desc">Honest, a little dry. Food puns are encouraged; cape-and-sword feature flexing is not.</p>
+    <div class="voice">
+      <div class="col do">
+        <h4>Do</h4>
+        <ul>
+          <li>Lean into the wrapper / soft-shell metaphor.</li>
+          <li>Be self-aware — Jira is dull and that's fine.</li>
+          <li>Lowercase "taco" in running copy; uppercase TACO in the wordmark only.</li>
+          <li>Use "//" comment framing for asides.</li>
+        </ul>
+      </div>
+      <div class="col dont">
+        <h4>Don't</h4>
+        <ul>
+          <li>Claim taco "replaces" or "fixes" Jira — it wraps it.</li>
+          <li>Overpromise AI magic. We did the AI; the user gets the shell.</li>
+          <li>Use exclamation points or hype words ("revolutionary", "10x", "delight").</li>
+          <li>Mix the brand yellow with non-brand accent colors.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Made with the same love as a Santa Maria burrito spice mix
+    <span class="dots">
+      <span class="dot r"></span>
+      <span class="dot y"></span>
+      <span class="dot g"></span>
+    </span>
+    &copy; taco
+  </footer>
+
+</div>
+</body>
+</html>

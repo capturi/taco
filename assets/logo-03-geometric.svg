@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300">
+  <!-- Style 3: Geometric / abstract -->
+  <rect width="400" height="300" fill="#0A1F44"/>
+  <!-- Shell as triangle wrap -->
+  <polygon points="60,210 200,80 340,210" fill="none" stroke="#F5C242" stroke-width="6"/>
+  <polygon points="60,210 200,80 340,210" fill="#F5C242" opacity="0.08"/>
+  <!-- Jira "J" abstracted: blue square + arc -->
+  <rect x="180" y="135" width="40" height="40" fill="#2684FF"/>
+  <path d="M 200 175 q 0 24 -22 24" fill="none" stroke="#2684FF" stroke-width="8" stroke-linecap="square"/>
+  <!-- Accent dots -->
+  <circle cx="140" cy="190" r="5" fill="#FF5630"/>
+  <circle cx="260" cy="190" r="5" fill="#36B37E"/>
+  <text x="200" y="255" font-family="'Courier New', monospace" font-size="40" font-weight="700" text-anchor="middle" fill="#F5C242" letter-spacing="6">TACO</text>
+  <text x="200" y="278" font-family="'Courier New', monospace" font-size="10" text-anchor="middle" fill="#9BB0D6" letter-spacing="2">// a soft shell around jira</text>
+</svg>

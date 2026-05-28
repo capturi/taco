@@ -1,0 +1,1089 @@
+:host, * {
+  box-sizing: border-box;
+}
+
+.taco-root {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #172b4d;
+  background: #fff;
+}
+
+.taco-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.taco-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.taco-toolbar label {
+  font-size: 12px;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.taco-segmented {
+  display: inline-flex;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.taco-segmented button {
+  appearance: none;
+  background: #fff;
+  border: 0;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #172b4d;
+}
+
+.taco-segmented button:hover {
+  background: #f4f5f7;
+}
+
+.taco-segmented button[aria-pressed="true"] {
+  background: #deebff;
+  color: #0747a6;
+  font-weight: 600;
+}
+
+.taco-segmented button[aria-pressed="true"]:hover {
+  background: #cde0ff;
+}
+
+.taco-input,
+.taco-select {
+  appearance: none;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: #fff;
+  color: #172b4d;
+  min-height: 32px;
+}
+
+.taco-input:focus,
+.taco-select:focus {
+  outline: 2px solid #4c9aff;
+  outline-offset: -1px;
+}
+
+.taco-button {
+  appearance: none;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: #fff;
+  color: #172b4d;
+  cursor: pointer;
+}
+
+.taco-button:hover { background: #f4f5f7; }
+
+.taco-button[aria-pressed="true"] {
+  background: #deebff;
+  color: #0747a6;
+  border-color: #b3d4ff;
+  font-weight: 600;
+}
+
+.taco-button[aria-pressed="true"]:hover { background: #cde0ff; }
+
+.taco-button.primary {
+  background: #0052cc;
+  color: #fff;
+  border-color: #0052cc;
+}
+
+.taco-button.primary:hover { background: #0747a6; }
+
+.taco-button.dark {
+  background: #172b4d;
+  color: #fff;
+  border-color: #172b4d;
+}
+
+.taco-button.dark:hover { background: #091e42; }
+
+.taco-spin {
+  display: inline-block;
+  animation: taco-spin 0.8s linear infinite;
+}
+
+@keyframes taco-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
+.taco-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
+.taco-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.taco-table th, .taco-table td {
+  text-align: left;
+  padding: 8px 16px;
+  border-bottom: 1px solid #ebecf0;
+  vertical-align: middle;
+}
+
+.taco-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5e6c84;
+  font-weight: 500;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.taco-table td.taco-nowrap {
+  white-space: nowrap;
+}
+
+.taco-table tr.taco-group-row {
+  cursor: pointer;
+  user-select: none;
+}
+
+.taco-table tr.taco-group-row:hover > td {
+  background: #ebecf0;
+}
+
+.taco-table tr.taco-group-row > td {
+  background: #f4f5f7;
+  padding: 6px 16px;
+  border-bottom: 1px solid #dfe1e6;
+  border-top: 1px solid #dfe1e6;
+}
+
+.taco-group-caret {
+  display: inline-block;
+  width: 14px;
+  color: #5e6c84;
+  font-size: 11px;
+  margin-right: 4px;
+}
+
+.taco-group-label {
+  font-weight: 600;
+  font-size: 13px;
+  margin-right: 8px;
+}
+
+.taco-group-count {
+  display: inline-block;
+  background: #dfe1e6;
+  color: #42526e;
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.taco-group-chips {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: 16px;
+  vertical-align: middle;
+}
+
+.taco-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taco-status-chip-count {
+  background: rgba(0, 0, 0, 0.12);
+  border-radius: 10px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 16px;
+  text-align: center;
+}
+
+.taco-avatar-stack {
+  display: inline-flex;
+  align-items: center;
+}
+
+.taco-avatar-mini,
+.taco-avatar-more {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #f4f5f7;
+  margin-left: -6px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.taco-avatar-mini:first-child,
+.taco-avatar-stack > :first-child {
+  margin-left: 0;
+}
+
+.taco-avatar-fallback {
+  background: #c1c7d0;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.taco-avatar-more {
+  background: #dfe1e6;
+  color: #42526e;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.taco-table tbody tr:hover { background: #f4f5f7; }
+
+.taco-key {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: #0052cc;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.taco-key:hover { text-decoration: underline; }
+
+.taco-summary {
+  color: #172b4d;
+  text-decoration: none;
+}
+
+.taco-summary:hover { text-decoration: underline; }
+
+.taco-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.taco-status.todo      { background: #dfe1e6; color: #42526e; }
+.taco-status.in-progress { background: #deebff; color: #0747a6; }
+.taco-status.done      { background: #e3fcef; color: #006644; }
+.taco-status.unknown   { background: #f4f5f7; color: #5e6c84; }
+
+.taco-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.taco-empty,
+.taco-loading,
+.taco-error {
+  padding: 48px;
+  text-align: center;
+  color: #5e6c84;
+}
+
+.taco-error { color: #de350b; }
+
+.taco-user-filter {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.taco-user-filter-label {
+  margin-right: 4px;
+}
+
+.taco-user-pill {
+  appearance: none;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: border-color 0.1s, opacity 0.1s, filter 0.1s;
+  opacity: 0.55;
+  filter: grayscale(40%);
+}
+
+.taco-user-pill:hover {
+  opacity: 1;
+  filter: none;
+  border-color: #dfe1e6;
+}
+
+.taco-user-pill.selected {
+  opacity: 1;
+  filter: none;
+  border-color: #0052cc;
+}
+
+.taco-user-pill img,
+.taco-user-pill-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: block;
+}
+
+.taco-user-pill-fallback {
+  background: #c1c7d0;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.taco-user-pill.me::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: #0052cc;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+}
+
+.taco-menu-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.taco-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(9, 30, 66, 0.15);
+  padding: 12px;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taco-jql-textarea {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  resize: vertical;
+}
+
+.taco-cell-edit {
+  position: relative;
+  display: inline-block;
+}
+
+.taco-cell-trigger {
+  appearance: none;
+  background: none;
+  border: 1px dashed transparent;
+  padding: 1px 4px;
+  margin: -1px -4px;
+  border-radius: 3px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.taco-cell-trigger:hover {
+  border-color: #c1c7d0;
+  background: #fafbfc;
+}
+
+.taco-cell-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  z-index: 10;
+  background: #fff;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(9, 30, 66, 0.18);
+  padding: 8px;
+  min-width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.taco-cell-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.taco-cell-option {
+  appearance: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  color: inherit;
+}
+
+.taco-cell-option:hover { background: #f4f5f7; }
+
+.taco-cell-loading,
+.taco-cell-error {
+  padding: 8px;
+  color: #5e6c84;
+  font-size: 12px;
+}
+
+.taco-cell-error { color: #de350b; }
+
+.taco-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 30, 66, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.taco-modal-panel {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(9, 30, 66, 0.3);
+  width: 1060px;
+  max-width: 90%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.taco-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dfe1e6;
+  background: #fafbfc;
+}
+
+.taco-modal-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.taco-modal-body {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taco-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.taco-modal-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5e6c84;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.taco-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #dfe1e6;
+  background: #fafbfc;
+}
+
+.taco-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.taco-pill-truncate {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.taco-epic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taco-epic-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(9, 30, 66, 0.12);
+}
+
+.taco-selected-button {
+  display: inline-flex;
+  align-items: stretch;
+  background: #deebff;
+  color: #0747a6;
+  border: 1px solid #b3d4ff;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 13px;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.taco-selected-button-main {
+  appearance: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  color: inherit;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.taco-selected-button-main:hover {
+  background: rgba(0, 82, 204, 0.08);
+}
+
+.taco-selected-button-clear {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-left: 1px solid #b3d4ff;
+  cursor: pointer;
+  padding: 0 10px;
+  font: inherit;
+  color: #5e6c84;
+}
+
+.taco-selected-button-clear:hover {
+  background: rgba(222, 53, 11, 0.08);
+  color: #de350b;
+}
+
+.taco-pill-clear {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  color: #5e6c84;
+  border-radius: 3px;
+}
+
+.taco-pill-clear:hover {
+  color: #de350b;
+  background: rgba(222, 53, 11, 0.08);
+}
+
+.taco-detail-sidebar {
+  background: #fff;
+  border-left: 1px solid #dfe1e6;
+  width: 480px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.taco-detail-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dfe1e6;
+  background: #fafbfc;
+}
+
+.taco-detail-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.taco-detail-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taco-detail-title-display {
+  cursor: text;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border: 1px dashed transparent;
+  border-radius: 3px;
+}
+
+.taco-detail-title-display:hover {
+  border-color: #c1c7d0;
+  background: #fafbfc;
+}
+
+.taco-detail-title-input {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 4px 8px;
+}
+
+.taco-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 24px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #dfe1e6;
+  background: #fafbfc;
+}
+
+.taco-detail-meta-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  max-width: 100%;
+}
+
+.taco-detail-meta-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5e6c84;
+  font-weight: 600;
+}
+
+.taco-detail-meta-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.taco-detail-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+.taco-detail-section {
+  margin-bottom: 24px;
+}
+
+.taco-detail-section h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5e6c84;
+  font-weight: 600;
+}
+
+.taco-detail-section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.taco-detail-section-head h3 {
+  margin: 0;
+}
+
+.taco-detail-section-help {
+  color: #5e6c84;
+  font-size: 12px;
+}
+
+.taco-detail-section-help:hover { color: #0747a6; }
+
+.taco-detail-edit-textarea {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.taco-detail-section h4 {
+  margin: 8px 0 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5e6c84;
+  font-weight: 500;
+}
+
+.taco-detail-empty {
+  color: #5e6c84;
+  font-style: italic;
+  margin: 0;
+}
+
+.taco-detail-description {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.taco-detail-description p { margin: 0 0 12px; }
+.taco-detail-description img { max-width: 100%; height: auto; border-radius: 3px; }
+.taco-detail-description pre {
+  background: #f4f5f7;
+  padding: 8px 12px;
+  border-radius: 3px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+.taco-detail-description code {
+  background: #f4f5f7;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+.taco-detail-description pre code { background: none; padding: 0; }
+.taco-detail-description a { color: #0052cc; }
+.taco-detail-description ul,
+.taco-detail-description ol { padding-left: 24px; margin: 0 0 12px; }
+
+.taco-detail-footer {
+  flex-shrink: 0;
+  background: #fafbfc;
+  border-top: 1px solid #dfe1e6;
+  padding: 12px 20px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.taco-detail-footer-light {
+  background: #fff;
+}
+
+.taco-detail-footer h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5e6c84;
+  font-weight: 600;
+}
+
+.taco-detail-footer h4 {
+  margin: 8px 0 4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5e6c84;
+  font-weight: 500;
+}
+
+.taco-detail-link-group { margin-top: 8px; }
+
+.taco-detail-link-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.taco-detail-link-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #ebecf0;
+  vertical-align: middle;
+}
+
+.taco-detail-link-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.taco-detail-link-table tr:hover td {
+  background: #fafbfc;
+}
+
+.taco-detail-link-table td:first-child {
+  width: 100%;
+  padding-left: 0;
+}
+
+.taco-detail-link-table td:last-child {
+  text-align: right;
+  padding-right: 0;
+}
+
+.taco-detail-link-table .taco-link-button {
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+.taco-detail-link-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.taco-detail-link-group li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+.taco-detail-link-group .taco-key {
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+
+.taco-detail-link-group .taco-status {
+  margin-top: 1px;
+}
+
+.taco-link-button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+.taco-pr-status {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.taco-pr-open    { background: #e3fcef; color: #006644; }
+.taco-pr-merged  { background: #eae6ff; color: #5243aa; }
+.taco-pr-declined,
+.taco-pr-closed  { background: #ffebe6; color: #bf2600; }
+.taco-pr-draft   { background: #dfe1e6; color: #42526e; }
+
+.taco-settings-help {
+  margin: 0 0 4px;
+  color: #5e6c84;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Rendered via the popover API so it floats in the top layer regardless of
+   the modal body's overflow. position/inset come from inline style, set from
+   the input's bounding rect; the rest is just visuals. */
+.taco-settings-results[popover] {
+  position: fixed;
+  margin: 0;
+  inset: auto;
+  background: #fff;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(9, 30, 66, 0.18);
+  padding: 4px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.taco-settings-favorites {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+}
+
+.taco-settings-favorites li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #ebecf0;
+}
+
+.taco-settings-favorites li:last-child {
+  border-bottom: 0;
+}
+
+.taco-settings-favorites li:hover {
+  background: #fafbfc;
+}
+
+.taco-settings-domain-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.taco-comments {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.taco-comment {
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: #fff;
+}
+
+.taco-comment-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.taco-comment-author {
+  font-weight: 600;
+  color: #172b4d;
+}
+
+.taco-comment-date {
+  color: #5e6c84;
+}
+
+.taco-settings-json {
+  padding: 12px 16px;
+  border-bottom: 1px solid #dfe1e6;
+  background: #fafbfc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.taco-settings-json-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.taco-settings-status-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.taco-settings-status-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid #dfe1e6;
+  border-radius: 4px;
+}
+
+.taco-settings-status-list li > :first-child {
+  flex: 1;
+}
+
+.taco-settings-status-list button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

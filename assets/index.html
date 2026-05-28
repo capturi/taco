@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>taco — a soft shell around Jira</title>
+  <meta name="description" content="taco is a soft shell around Jira. A thin wrapper that smooths the hard edges." />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <style>
+    :root {
+      --navy: #0A1F44;
+      --navy-2: #0E2A5C;
+      --yellow: #F5C242;
+      --jira: #2684FF;
+      --jira-dark: #0052CC;
+      --red: #FF5630;
+      --green: #36B37E;
+      --muted: #9BB0D6;
+      --text: #E8EEFA;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: var(--navy);
+      color: var(--text);
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(38, 132, 255, 0.10), transparent 40%),
+        radial-gradient(circle at 80% 100%, rgba(245, 194, 66, 0.08), transparent 45%),
+        var(--navy);
+    }
+
+    .container {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 56px 24px 96px;
+    }
+
+    header.hero {
+      text-align: center;
+      padding-top: 24px;
+    }
+
+    .logo {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+    }
+
+    h1.tagline {
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--muted);
+      margin: 16px 0 8px;
+      letter-spacing: 1px;
+    }
+
+    h1.tagline strong {
+      color: var(--yellow);
+      font-weight: 700;
+    }
+
+    .lede {
+      max-width: 580px;
+      margin: 28px auto 0;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .lede .comment {
+      color: var(--muted);
+    }
+
+    section {
+      margin-top: 64px;
+    }
+
+    h2 {
+      font-size: 14px;
+      color: var(--yellow);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin: 0 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2::before {
+      content: "//";
+      color: var(--muted);
+    }
+
+    .pitch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .pitch {
+      border: 1px solid rgba(155, 176, 214, 0.18);
+      background: rgba(14, 42, 92, 0.45);
+      padding: 18px 18px 16px;
+      border-radius: 6px;
+    }
+
+    .pitch .tag {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--navy);
+      background: var(--yellow);
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .pitch h3 {
+      font-size: 15px;
+      margin: 0 0 6px;
+      color: var(--text);
+    }
+
+    .pitch p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .install-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    a.install {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      background: var(--navy-2);
+      border: 1px solid rgba(155, 176, 214, 0.2);
+      border-radius: 6px;
+      color: var(--text);
+      text-decoration: none;
+      transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+    }
+
+    a.install:hover {
+      transform: translateY(-2px);
+      border-color: var(--yellow);
+      background: rgba(245, 194, 66, 0.08);
+    }
+
+    a.install .icon {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+
+    a.install .meta {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    a.install .name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    a.install .sub {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      margin-top: 2px;
+    }
+
+    a.install.placeholder {
+      opacity: 0.85;
+    }
+
+    a.install.placeholder .sub::after {
+      content: " · placeholder";
+      color: var(--red);
+    }
+
+    a.install.primary {
+      border-color: var(--yellow);
+      background: linear-gradient(180deg, rgba(245, 194, 66, 0.16), rgba(245, 194, 66, 0.04));
+    }
+
+    a.install.primary:hover {
+      background: rgba(245, 194, 66, 0.18);
+      transform: translateY(-2px);
+    }
+
+    a.install.primary .name {
+      color: var(--yellow);
+    }
+
+    .step {
+      font-size: 11px;
+      color: var(--yellow);
+      letter-spacing: 3px;
+      margin: 0 0 10px;
+      text-transform: uppercase;
+    }
+
+    .step+.install-list,
+    .step+.install {
+      margin-top: 6px;
+    }
+
+    .step.after {
+      margin-top: 32px;
+    }
+
+    footer {
+      margin-top: 80px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 2px;
+    }
+
+    footer .dots {
+      display: inline-flex;
+      gap: 6px;
+      margin: 0 10px;
+      vertical-align: middle;
+    }
+
+    footer .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    footer .dot.r {
+      background: var(--red);
+    }
+
+    footer .dot.g {
+      background: var(--green);
+    }
+
+    footer .dot.y {
+      background: var(--yellow);
+    }
+
+    @media (max-width: 520px) {
+      .container {
+        padding: 32px 18px 64px;
+      }
+
+      h1.tagline {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header class="hero">
+      <!-- Inline logo (mirrors taco-logo.svg) -->
+      <svg class="logo" viewBox="0 0 400 265" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="taco logo">
+        <polygon points="60,210 200,80 340,210" fill="none" stroke="#F5C242" stroke-width="6" />
+        <polygon points="60,210 200,80 340,210" fill="#F5C242" opacity="0.08" />
+        <rect x="180" y="135" width="40" height="40" fill="#2684FF" />
+        <path d="M 200 175 q 0 24 -22 24" fill="none" stroke="#2684FF" stroke-width="8" stroke-linecap="square" />
+        <circle cx="140" cy="190" r="5" fill="#FF5630" />
+        <circle cx="260" cy="190" r="5" fill="#36B37E" />
+        <text x="200" y="255" font-family="'Courier New', monospace" font-size="40" font-weight="700"
+          text-anchor="middle" fill="#F5C242" letter-spacing="6">TACO</text>
+      </svg>
+
+      <h1 class="tagline">A <strong>soft shell</strong> around Jira.</h1>
+
+      <p class="lede">
+        <span class="comment">// everything you already use,</span><br />
+        just easier to hold.
+      </p>
+    </header>
+
+    <section>
+      <h2>Why taco</h2>
+      <div class="pitch-grid">
+        <div class="pitch">
+          <span class="tag">AI FROM DAY ZERO</span>
+          <h3>We used AI, so you don't have to</h3>
+          <p>Before you ever opened taco, the AI was already done — you just get the shell. <br>Not baked in, baked with
+            AI.
+          </p>
+        </div>
+        <div class="pitch">
+          <span class="tag">3X</span>
+          <h3>Making you a 3x developer</h3>
+          <p>Creating a ticket in taco saves up to 20 clicks — three times more productive, letting you waste your time
+            where it really matters.</p>
+        </div>
+        <div class="pitch">
+          <span class="tag">mild</span>
+          <h3>Same dull flavor</h3>
+          <p>Taco doesn't make Jira hot; it just makes it easier to swallow.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Install</h2>
+      <p style="color: var(--muted); font-size: 13px; margin: -8px 0 24px;">
+        taco is a userscript. Install a manager, then add taco.
+      </p>
+
+      <p class="step">Step 1 — A userscript manager</p>
+      <div class="install-list">
+
+        <a class="install"
+          href="https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag" target="_blank"
+          rel="noopener">
+          <svg class="icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="24" cy="24" r="22" fill="#fff" />
+            <path d="M24 14h18.4A22 22 0 0 0 6.6 14H24z" fill="#EA4335" />
+            <path d="M6.6 14 15.8 30A10 10 0 0 1 24 14H6.6z" fill="#FBBC05" />
+            <path d="M42.4 14H24a10 10 0 0 1 8.2 16l-9.2 16A22 22 0 0 0 42.4 14z" fill="#34A853" />
+            <path d="M15.8 30 6.6 14A22 22 0 0 0 23 46l9.2-16A10 10 0 0 1 15.8 30z" fill="#4285F4" />
+            <circle cx="24" cy="24" r="8" fill="#fff" />
+            <circle cx="24" cy="24" r="6" fill="#4285F4" />
+          </svg>
+          <span class="meta">
+            <span class="name">Chrome</span>
+            <span class="sub">VIOLENTMONKEY<br>WEB STORE</span>
+          </span>
+        </a>
+
+        <a class="install" href="https://addons.mozilla.org/firefox/addon/violentmonkey/" target="_blank"
+          rel="noopener">
+          <svg class="icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <radialGradient id="ff1" cx="24" cy="24" r="22" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#FFEA00" />
+                <stop offset="40%" stop-color="#FF9100" />
+                <stop offset="100%" stop-color="#E53935" />
+              </radialGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#ff1)" />
+            <path d="M16 12c-4 4-5 10-2 14 2 3 6 4 9 2-3-1-5-4-4-7 1-2 4-3 6-2 2 1 3 3 3 5 2-3 1-7-1-10-3-3-8-4-11-2z"
+              fill="#1565C0" opacity="0.85" />
+          </svg>
+          <span class="meta">
+            <span class="name">Firefox</span>
+            <span class="sub">VIOLENTMONKEY<br>ADD-ONS</span>
+          </span>
+        </a>
+
+        <a class="install" href="https://apps.apple.com/app/userscripts/id1463298887" target="_blank" rel="noopener">
+          <svg class="icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="sf1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3DD5F3" />
+                <stop offset="100%" stop-color="#1E88E5" />
+              </linearGradient>
+            </defs>
+            <circle cx="24" cy="24" r="22" fill="url(#sf1)" />
+            <circle cx="24" cy="24" r="14" fill="none" stroke="#fff" stroke-width="2" />
+            <path d="M24 24 L31 17" stroke="#fff" stroke-width="3" stroke-linecap="round" />
+            <path d="M24 24 L20 30" stroke="#E53935" stroke-width="3" stroke-linecap="round" />
+          </svg>
+          <span class="meta">
+            <span class="name">Safari</span>
+            <span class="sub">USERSCRIPTS<br>MAC APP STORE</span>
+          </span>
+        </a>
+
+      </div>
+
+      <p class="step after">Step 2 — Add taco</p>
+      <a class="install primary placeholder" href="#" target="_blank" rel="noopener">
+        <svg class="icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <polygon points="6,38 24,10 42,38" fill="none" stroke="#F5C242" stroke-width="3" />
+          <rect x="20" y="22" width="8" height="8" fill="#2684FF" />
+          <circle cx="14" cy="34" r="1.8" fill="#FF5630" />
+          <circle cx="34" cy="34" r="1.8" fill="#36B37E" />
+        </svg>
+        <span class="meta">
+          <span class="name">Install taco.user.js</span>
+          <span class="sub">CLICK TO ADD TO YOUR MANAGER</span>
+        </span>
+      </a>
+    </section>
+
+    <footer>
+      Made with the same love as a Santa Maria burrito spice mix
+      <span class="dots">
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+      </span>
+      &copy; taco
+    </footer>
+
+  </div>
+</body>
+
+</html>
