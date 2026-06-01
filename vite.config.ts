@@ -14,7 +14,7 @@ const VERSION = process.env.TACO_VERSION ?? pkg.version;
 // gets the newest version without us ever editing the URL.
 // In CI, GITHUB_REPOSITORY is set automatically (e.g. "OWNER/REPO").
 // Locally, set TACO_GITHUB_REPO to mimic, or leave the placeholder.
-const REPO = process.env.TACO_GITHUB_REPO ?? process.env.GITHUB_REPOSITORY ?? 'OWNER/REPO';
+const REPO = process.env.TACO_GITHUB_REPO ?? process.env.GITHUB_REPOSITORY ?? 'capturi/taco';
 const SCRIPT_NAME = 'taco.user.js';
 const DOWNLOAD_URL = `https://github.com/${REPO}/releases/latest/download/${SCRIPT_NAME}`;
 

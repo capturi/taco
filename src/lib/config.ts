@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from 'react';
-import type { Issue, ProductDomain, User } from '../api/types';
+import type { Issue, IssueType, ProductDomain, User } from '../api/types';
 
 // User-controlled settings persisted in localStorage under `taco.config`.
 // All fields are optional on disk so new fields can be added without
@@ -16,6 +16,9 @@ export type Config = {
   favoriteUsers: User[];
   favoriteProductDomains: ProductDomain[];
   favoriteStatuses: Issue['status'][];
+  // Issue types shown in the create dialog and in what order. Empty = show all
+  // non-subtask types reported by the project.
+  favoriteIssueTypes: IssueType[];
   // Name of the status that's pre-selected when opening the create dialog.
   // Stored as a name (case-insensitive match) so it survives reordering and
   // doesn't have to be one of the favorites — but in practice it always is,
@@ -25,6 +28,24 @@ export type Config = {
   // picker in the create / table editors. Null = pick the project's first
   // scrum board (the legacy auto-detect behaviour).
   sprintBoardId: number | null;
+  // Saved filter presets shown as toggle buttons in the toolbar. Each one
+  // bundles a selection of people, domains and components; activating it
+  // narrows the overview to issues matching all of its non-empty dimensions.
+  customFilters: CustomFilter[];
+  // Width (px) of the issue detail sidebar; persisted so the user's preferred
+  // size survives reopening the panel and reloads.
+  detailWidth: number;
+};
+
+// A named filter preset. Within a dimension the selected values are OR'd
+// (any of these people); across dimensions they're AND'd (one of these people
+// AND one of these domains). Empty dimensions impose no constraint.
+export type CustomFilter = {
+  id: string;
+  name: string;
+  assigneeAccountIds: string[];
+  productDomainIds: string[];
+  componentIds: string[];
 };
 
 const STORAGE_KEY = 'taco.config';
@@ -33,8 +54,11 @@ const DEFAULT_CONFIG: Config = {
   favoriteUsers: [],
   favoriteProductDomains: [],
   favoriteStatuses: [],
+  favoriteIssueTypes: [],
   defaultCreateStatus: null,
   sprintBoardId: null,
+  customFilters: [],
+  detailWidth: 480,
 };
 
 let cache: Partial<Config> = readFromStorage();

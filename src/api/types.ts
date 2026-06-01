@@ -10,6 +10,7 @@ export type Issue = {
   epic: EpicRef | null;
   sprint: Sprint | null;
   productDomain: ProductDomain | null;
+  components: Component[];
   labels: string[];
   updated: string;
   url: string;

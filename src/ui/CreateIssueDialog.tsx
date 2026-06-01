@@ -163,15 +163,29 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
     return [...observedStatuses].sort((a, b) => statusRank(a.name) - statusRank(b.name));
   }, [config.favoriteStatuses, observedStatuses]);
 
-  const types = (typesQuery.data ?? []).filter((t) => !t.subtask);
+  // Favorite types (in user-configured order) when set, intersected with what
+  // the project actually offers so stale favorites drop out; otherwise all
+  // non-subtask types as reported.
+  const types = useMemo(() => {
+    const available = (typesQuery.data ?? []).filter((t) => !t.subtask);
+    if (config.favoriteIssueTypes.length === 0) return available;
+    const byName = new Map(available.map((t) => [t.name.toLowerCase(), t]));
+    return config.favoriteIssueTypes
+      .map((f) => byName.get(f.name.toLowerCase()))
+      .filter((t): t is NonNullable<typeof t> => t !== undefined);
+  }, [typesQuery.data, config.favoriteIssueTypes]);
 
   useEffect(() => {
     if (!issueTypeName && types.length > 0) {
-      // Prefer Task / Story if available, else first.
-      const preferred = types.find((t) => /^task|story$/i.test(t.name)) ?? types[0];
+      // When favorites are configured the first is the user's default;
+      // otherwise prefer Task / Story if available, else first.
+      const preferred =
+        config.favoriteIssueTypes.length > 0
+          ? types[0]
+          : (types.find((t) => /^task|story$/i.test(t.name)) ?? types[0]);
       setIssueTypeName(preferred.name);
     }
-  }, [types, issueTypeName]);
+  }, [types, issueTypeName, config.favoriteIssueTypes]);
 
   useEffect(() => {
     if (!statusName && statuses.length > 0) {

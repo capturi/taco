@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type ClipboardEvent, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ClipboardEvent, type PointerEvent, type ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { marked } from 'marked';
 import type { ADFDocLike, IssueComment, IssueLink, IssueRef } from '../api/types';
 import { adfToMarkdown, hasUnsupportedAdf, markdownToAdf } from '../lib/adfMarkdown';
+import { useConfig } from '../lib/config';
 import { getClient } from './cache';
 import { DevInfoSection } from './DevInfoSection';
 import {
@@ -22,8 +23,41 @@ type Props = {
   onSelectIssue: (key: string) => void;
 };
 
+const MIN_DETAIL_WIDTH = 320;
+const MAX_DETAIL_WIDTH = 1100;
+
 export function IssueDetail({ issueKey, onClose, onSelectIssue }: Props) {
   const client = getClient();
+  const { config, update } = useConfig();
+  const [width, setWidth] = useState(config.detailWidth);
+  const dragRef = useRef<{ startX: number; startWidth: number } | null>(null);
+
+  const clampWidth = (w: number) =>
+    Math.min(MAX_DETAIL_WIDTH, Math.max(MIN_DETAIL_WIDTH, w));
+
+  const onResizeStart = useCallback((e: PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    dragRef.current = { startX: e.clientX, startWidth: width };
+
+    const onMove = (ev: globalThis.PointerEvent) => {
+      const drag = dragRef.current;
+      if (!drag) return;
+      // Handle is on the left edge; dragging left (smaller clientX) widens.
+      setWidth(clampWidth(drag.startWidth + (drag.startX - ev.clientX)));
+    };
+    const onUp = () => {
+      dragRef.current = null;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      setWidth((w) => {
+        update({ detailWidth: w });
+        return w;
+      });
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }, [width, update]);
+
   const detailQuery = useQuery({
     queryKey: ['issue-detail', issueKey],
     queryFn: () => client.getIssueDetail(issueKey),
@@ -55,7 +89,19 @@ export function IssueDetail({ issueKey, onClose, onSelectIssue }: Props) {
   }, [detailQuery.data]);
 
   return (
-    <aside className="taco-detail-sidebar" role="complementary" aria-label="Issue detail">
+    <aside
+      className="taco-detail-sidebar"
+      role="complementary"
+      aria-label="Issue detail"
+      style={{ width }}
+    >
+      <div
+        className="taco-detail-resize-handle"
+        onPointerDown={onResizeStart}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize detail view"
+      />
         <header className="taco-detail-header">
           <div className="taco-detail-header-row">
             {detailQuery.data && (

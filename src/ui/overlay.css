@@ -21,13 +21,66 @@
   overflow: hidden;
 }
 
+/* Grid so the view controls and the search/options/close share the first row,
+   while the filter group drops to a full-width second row beneath both —
+   reclaiming the space under the search instead of leaving it blank. */
 .taco-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
+  gap: 8px;
   padding: 10px 16px;
   border-bottom: 1px solid #dfe1e6;
+}
+
+.taco-toolbar-controls {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Search / options / close stay pinned top-right and never wrap. */
+.taco-toolbar-end {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Absolutely positioned so it overlays the toolbar's top edge without
+   adding to its height. */
+.taco-loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+}
+
+/* The morse-code "tape" — two identical copies of the pattern that slide
+   left continuously; the sliding (translateX) is driven by the Web
+   Animations API in LoadingBar. */
+.taco-loading-tape {
+  display: flex;
+  height: 100%;
+  width: max-content;
+  will-change: transform;
+}
+
+.taco-loading-dit {
+  height: 100%;
+  background: #2684ff;
+}
+
+.taco-loading-gap {
+  height: 100%;
 }
 
 .taco-toolbar label {
@@ -37,8 +90,27 @@
   letter-spacing: 0.04em;
 }
 
+/* Sprint / User / custom filters bundled as one visual group. Sits on the
+   toolbar's second grid row spanning both columns, so it can grow under the
+   search box; justify-self keeps the box only as wide as its content. */
+.taco-filter-group {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid #dfe1e6;
+  border-radius: 6px;
+  background: #fafbfc;
+}
+
 .taco-segmented {
+  box-sizing: border-box;
   display: inline-flex;
+  min-height: 32px;
   border: 1px solid #dfe1e6;
   border-radius: 4px;
   overflow: hidden;
@@ -46,6 +118,8 @@
 
 .taco-segmented button {
   appearance: none;
+  display: inline-flex;
+  align-items: center;
   background: #fff;
   border: 0;
   padding: 6px 12px;
@@ -88,10 +162,20 @@
 
 .taco-button {
   appearance: none;
+  box-sizing: border-box;
+  /* Flex-centre so single-glyph buttons (e.g. the ↻ refresh) sit centred and
+     all controls share one height. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
   border: 1px solid #dfe1e6;
   border-radius: 4px;
   padding: 6px 12px;
   font-size: 13px;
+  /* Fixed line-height so emoji glyphs (taller metrics) in e.g. custom filter
+     names don't grow the button height. */
+  line-height: 18px;
   background: #fff;
   color: #172b4d;
   cursor: pointer;
@@ -275,6 +359,8 @@
 
 .taco-table tbody tr:hover { background: #f4f5f7; }
 
+.taco-table tr.taco-issue-row { cursor: pointer; }
+
 .taco-key {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 12px;
@@ -334,8 +420,31 @@
   gap: 4px;
 }
 
-.taco-user-filter-label {
-  margin-right: 4px;
+.taco-custom-filters {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.taco-custom-filter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid #dfe1e6;
+  border-radius: 6px;
+  background: #fafbfc;
+}
+
+.taco-custom-filter-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.taco-custom-filter-card-head .taco-input {
+  flex: 1;
 }
 
 .taco-user-pill {
@@ -416,6 +525,19 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.taco-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #dfe1e6;
+}
+
+.taco-menu-actions .taco-button {
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .taco-jql-textarea {
@@ -663,7 +785,17 @@
   background: rgba(222, 53, 11, 0.08);
 }
 
+/* Clear-all sits at the end of the filter group, set off by a divider. */
+.taco-filter-clear {
+  align-self: stretch;
+  margin-left: 2px;
+  padding: 0 6px;
+  border-left: 1px solid #dfe1e6;
+  border-radius: 0;
+}
+
 .taco-detail-sidebar {
+  position: relative;
   background: #fff;
   border-left: 1px solid #dfe1e6;
   width: 480px;
@@ -671,6 +803,23 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* Drag handle sitting over the sidebar's left edge; widens the panel as it's
+   pulled left. */
+.taco-detail-resize-handle {
+  position: absolute;
+  top: 0;
+  left: -3px;
+  width: 7px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 1;
+  touch-action: none;
+}
+
+.taco-detail-resize-handle:hover {
+  background: rgba(38, 132, 255, 0.18);
 }
 
 .taco-detail-header {
@@ -1081,6 +1230,12 @@
 
 .taco-settings-status-list li > :first-child {
   flex: 1;
+}
+
+.taco-issue-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .taco-settings-status-list button[disabled] {

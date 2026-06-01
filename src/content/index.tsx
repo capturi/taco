@@ -19,14 +19,22 @@ function injectNavButton(): void {
   if (svg) {
     svg.removeAttribute('width');
     svg.removeAttribute('height');
-    Object.assign(svg.style, { display: 'block', height: '24px', width: 'auto' });
+    // Absolute-positioned so the text can sit centered in the button without
+    // the logo shifting it off-center.
+    Object.assign(svg.style, {
+      display: 'block',
+      height: '20px',
+      width: 'auto',
+      position: 'absolute',
+      left: '12px',
+      top: '50%',
+      transform: 'translateY(-50%)',
+    });
   }
   Object.assign(btn.style, {
     appearance: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    gap: '8px',
+    position: 'relative',
+    display: 'block',
     width: 'calc(100% - 16px)',
     margin: '8px',
     background: NAVY,
@@ -36,6 +44,7 @@ function injectNavButton(): void {
     padding: '8px 12px',
     fontSize: '14px',
     fontWeight: '500',
+    textAlign: 'center',
     cursor: 'pointer',
     boxSizing: 'border-box',
   } satisfies Partial<CSSStyleDeclaration>);

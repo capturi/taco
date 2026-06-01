@@ -12,6 +12,7 @@ import { OverviewTable } from './OverviewTable';
 import { IssueDetail } from './IssueDetail';
 import { CreateIssueDialog } from './CreateIssueDialog';
 import { SettingsDialog } from './SettingsDialog';
+import { CustomFiltersDialog } from './CustomFiltersDialog';
 import { SessionProvider } from './session';
 
 export function App({ onClose }: { onClose: () => void }) {
@@ -29,6 +30,7 @@ export function App({ onClose }: { onClose: () => void }) {
   const [selectedIssueKey, setSelectedIssueKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [customFiltersOpen, setCustomFiltersOpen] = useState(false);
 
   // Resolve the Product Domain custom field id once; used to pre-filter the
   // issue search to favorite domains so we don't fetch the whole project.
@@ -65,7 +67,14 @@ export function App({ onClose }: { onClose: () => void }) {
 
   const issues = issuesQuery.data ?? EMPTY_ISSUES;
   const me = meQuery.data ?? null;
-  const filtered = useMemo(() => applyFilters(issues, filters), [issues, filters]);
+  const activeCustomFilter = useMemo(
+    () => config.customFilters.find((f) => f.id === filters.customFilterId) ?? null,
+    [config.customFilters, filters.customFilterId],
+  );
+  const filtered = useMemo(
+    () => applyFilters(issues, filters, activeCustomFilter),
+    [issues, filters, activeCustomFilter],
+  );
   const groups = useMemo(() => groupIssues(filtered, groupKey), [filtered, groupKey]);
 
   const derivedAssignees = useMemo(() => collectAssignees(issues), [issues]);
@@ -130,8 +139,9 @@ export function App({ onClose }: { onClose: () => void }) {
           onGroupKeyChange={setGroupKey}
           filters={filters}
           onFiltersChange={setFilters}
+          customFilters={config.customFilters}
+          onConfigureCustomFilters={() => setCustomFiltersOpen(true)}
           assignees={allAssignees}
-          productDomains={allProductDomains}
           me={me}
           allCollapsed={allCollapsed}
           onToggleAllGroups={toggleAllGroups}
@@ -189,6 +199,16 @@ export function App({ onClose }: { onClose: () => void }) {
         <SettingsDialog
           projectKey={defaultProjectKeyFromJql(jql, config.projectKey)}
           onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
+      {customFiltersOpen && (
+        <CustomFiltersDialog
+          projectKey={defaultProjectKeyFromJql(jql, config.projectKey)}
+          assignees={allAssignees}
+          productDomains={allProductDomains}
+          me={me}
+          onClose={() => setCustomFiltersOpen(false)}
         />
       )}
     </div>

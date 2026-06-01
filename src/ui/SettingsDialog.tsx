@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { Issue, ProductDomain, User } from '../api/types';
+import type { Issue, IssueType, ProductDomain, User } from '../api/types';
 import { useConfig, type Config } from '../lib/config';
 import { useDebouncedValue } from '../lib/useDebouncedValue';
 import { getClient } from './cache';
@@ -54,6 +54,11 @@ export function SettingsDialog({ projectKey, onClose }: Props) {
           <FavoriteProductDomainsSection
             favorites={config.favoriteProductDomains}
             onChange={(favoriteProductDomains) => update({ favoriteProductDomains })}
+          />
+          <FavoriteIssueTypesSection
+            projectKey={projectKey}
+            favorites={config.favoriteIssueTypes}
+            onChange={(favoriteIssueTypes) => update({ favoriteIssueTypes })}
           />
           <FavoriteStatusesSection
             projectKey={projectKey}
@@ -182,9 +187,12 @@ function SprintSourceSection({ projectKey, sprintBoardId, onChange }: SprintSour
     queryKey: ['project-boards', projectKey],
     queryFn: () => client.getProjectBoards(projectKey),
     staleTime: 60 * 60_000,
+    // Settings should reflect Jira as it is right now; refetch every time the
+    // dialog opens (cached data still renders instantly while it revalidates).
+    refetchOnMount: 'always',
   });
 
-  const boards = boardsQuery.data ?? [];
+  const boards = (boardsQuery.data ?? []).toSorted((a, b) => a.name.localeCompare(b.name));
   // Stale id (configured board no longer exists) — surface it so the user can
   // notice and pick a different one.
   const configuredBoardMissing =
@@ -232,6 +240,133 @@ function SprintSourceSection({ projectKey, sprintBoardId, onChange }: SprintSour
   );
 }
 
+type FavoriteIssueTypesSectionProps = {
+  projectKey: string;
+  favorites: IssueType[];
+  onChange: (next: IssueType[]) => void;
+};
+
+function FavoriteIssueTypesSection({
+  projectKey,
+  favorites,
+  onChange,
+}: FavoriteIssueTypesSectionProps) {
+  const client = getClient();
+  const typesQuery = useQuery({
+    queryKey: ['issue-types', projectKey],
+    queryFn: () => client.getIssueTypes(projectKey),
+    staleTime: Infinity,
+    refetchOnMount: 'always',
+  });
+
+  const favoriteNames = useMemo(
+    () => new Set(favorites.map((t) => t.name.toLowerCase())),
+    [favorites],
+  );
+  const available = (typesQuery.data ?? []).filter(
+    (t) => !t.subtask && !favoriteNames.has(t.name.toLowerCase()),
+  );
+
+  const move = (idx: number, delta: number) => {
+    const target = idx + delta;
+    if (target < 0 || target >= favorites.length) return;
+    const next = favorites.slice();
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+  const sortAlphabetically = () =>
+    onChange([...favorites].sort((a, b) => a.name.localeCompare(b.name)));
+  const add = (t: IssueType) => onChange([...favorites, t]);
+  const remove = (idx: number) => onChange(favorites.filter((_, i) => i !== idx));
+
+  return (
+    <section className="taco-modal-field">
+      <span className="taco-modal-label">Ticket types</span>
+      <p className="taco-settings-help">
+        Controls which issue types appear and in what order in the create dialog. Leave empty to
+        show every non-subtask type in the project. The first one is the default when creating.
+      </p>
+
+      {typesQuery.isPending && <div className="taco-cell-loading">Loading types…</div>}
+      {typesQuery.isError && (
+        <div className="taco-cell-error">
+          Couldn't load types:{' '}
+          {typesQuery.error instanceof Error ? typesQuery.error.message : 'unknown'}
+        </div>
+      )}
+
+      {favorites.length === 0 ? (
+        <p className="taco-detail-empty">No favorites configured.</p>
+      ) : (
+        <>
+          {favorites.length > 1 && (
+            <div>
+              <button type="button" className="taco-button" onClick={sortAlphabetically}>
+                Sort A–Z
+              </button>
+            </div>
+          )}
+          <ol className="taco-settings-status-list">
+            {favorites.map((t, idx) => (
+              <li key={t.id ?? t.name}>
+                <span className="taco-issue-type">
+                  {t.iconUrl && <img src={t.iconUrl} alt="" width={16} height={16} />}
+                  {t.name}
+                </span>
+                <button
+                  type="button"
+                  className="taco-button"
+                  onClick={() => move(idx, -1)}
+                  disabled={idx === 0}
+                  aria-label={`Move ${t.name} up`}
+                  title="Move up"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className="taco-button"
+                  onClick={() => move(idx, 1)}
+                  disabled={idx === favorites.length - 1}
+                  aria-label={`Move ${t.name} down`}
+                  title="Move down"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  className="taco-pill-clear"
+                  onClick={() => remove(idx)}
+                  aria-label={`Remove ${t.name}`}
+                  title="Remove"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+
+      {available.length > 0 && (
+        <div className="taco-settings-domain-grid">
+          {available.map((t) => (
+            <button
+              key={t.id ?? t.name}
+              type="button"
+              className="taco-button"
+              onClick={() => add(t)}
+              title={`Add ${t.name} to favorites`}
+            >
+              + {t.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
 type FavoriteStatusesSectionProps = {
   projectKey: string;
   favorites: Issue['status'][];
@@ -252,6 +387,7 @@ function FavoriteStatusesSection({
     queryKey: ['project-statuses', projectKey],
     queryFn: () => client.getProjectStatuses(projectKey),
     staleTime: 60 * 60_000,
+    refetchOnMount: 'always',
   });
 
   const favoriteNames = useMemo(
@@ -396,6 +532,7 @@ function FavoriteProductDomainsSection({
     queryKey: ['product-domain-options'],
     queryFn: () => client.getProductDomainOptions(),
     staleTime: 60 * 60_000,
+    refetchOnMount: 'always',
   });
 
   // Union the fetched options with already-favorited ones, so a favorite that
@@ -535,6 +672,17 @@ function FavoritePeopleSection({ favorites, onChange }: FavoritePeopleSectionPro
     onChange(favorites.filter((u) => u.accountId !== accountId));
   };
 
+  const move = (idx: number, delta: number) => {
+    const target = idx + delta;
+    if (target < 0 || target >= favorites.length) return;
+    const next = favorites.slice();
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+
+  const sortAlphabetically = () =>
+    onChange([...favorites].sort((a, b) => a.displayName.localeCompare(b.displayName)));
+
   return (
     <section className="taco-modal-field">
       <span className="taco-modal-label">Favorite people</span>
@@ -587,22 +735,51 @@ function FavoritePeopleSection({ favorites, onChange }: FavoritePeopleSectionPro
       {favorites.length === 0 ? (
         <p className="taco-detail-empty">No favorites yet.</p>
       ) : (
-        <ul className="taco-settings-favorites">
-          {favorites.map((u) => (
-            <li key={u.accountId}>
-              <UserAvatar user={u} />
-              <span style={{ flex: 1 }}>{u.displayName}</span>
-              <button
-                type="button"
-                className="taco-pill-clear"
-                aria-label={`Remove ${u.displayName} from favorites`}
-                onClick={() => remove(u.accountId)}
-              >
-                ✕
+        <>
+          {favorites.length > 1 && (
+            <div>
+              <button type="button" className="taco-button" onClick={sortAlphabetically}>
+                Sort A–Z
               </button>
-            </li>
-          ))}
-        </ul>
+            </div>
+          )}
+          <ul className="taco-settings-favorites">
+            {favorites.map((u, idx) => (
+              <li key={u.accountId}>
+                <UserAvatar user={u} />
+                <span style={{ flex: 1 }}>{u.displayName}</span>
+                <button
+                  type="button"
+                  className="taco-button"
+                  onClick={() => move(idx, -1)}
+                  disabled={idx === 0}
+                  aria-label={`Move ${u.displayName} up`}
+                  title="Move up"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  className="taco-button"
+                  onClick={() => move(idx, 1)}
+                  disabled={idx === favorites.length - 1}
+                  aria-label={`Move ${u.displayName} down`}
+                  title="Move down"
+                >
+                  ↓
+                </button>
+                <button
+                  type="button"
+                  className="taco-pill-clear"
+                  aria-label={`Remove ${u.displayName} from favorites`}
+                  onClick={() => remove(u.accountId)}
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </section>
   );

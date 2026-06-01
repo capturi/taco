@@ -29,6 +29,7 @@ const FIELDS = [
   'parent',
   'labels',
   'updated',
+  'components',
   '*navigable', // pulls all navigable customfields incl. sprint, regardless of id
 ];
 
@@ -872,6 +873,7 @@ function mapIssue(
       parent?: { key?: string; fields?: { summary?: string; issuetype?: { name?: string } } };
       labels?: string[];
       updated?: string;
+      components?: Array<{ id?: string; name?: string }>;
     };
   };
   const f = r.fields;
@@ -892,6 +894,9 @@ function mapIssue(
     epic: mapEpic(f.parent),
     sprint: findSprint(f),
     productDomain: productDomainFieldId ? extractProductDomain(f[productDomainFieldId]) : null,
+    components: (f.components ?? [])
+      .filter((c): c is { id: string; name?: string } => typeof c?.id === 'string')
+      .map((c) => ({ id: c.id, name: c.name ?? '' })),
     labels: f.labels ?? [],
     updated: f.updated ?? '',
     url: `${origin}/browse/${r.key}`,

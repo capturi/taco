@@ -55,6 +55,7 @@ function makeColumns(onIssueClick: (issueKey: string) => void): ColumnDef<Issue>
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         e.preventDefault();
+        e.stopPropagation();
         onIssueClick(issue.key);
       }}
     >
@@ -71,6 +72,7 @@ function makeColumns(onIssueClick: (issueKey: string) => void): ColumnDef<Issue>
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
         e.preventDefault();
+        e.stopPropagation();
         onIssueClick(key);
       }}
     >
@@ -145,6 +147,10 @@ function makeColumns(onIssueClick: (issueKey: string) => void): ColumnDef<Issue>
   ];
 }
 
+// Columns whose cells contain inline editors (popovers); clicks on these
+// must not bubble up to open the detail sidebar.
+const INTERACTIVE_COLUMNS = new Set(['status', 'assignee', 'sprint']);
+
 type GroupedRow =
   | { kind: 'group'; group: Group }
   | { kind: 'issue'; groupId: string; issue: Issue };
@@ -214,9 +220,28 @@ export function OverviewTable({ groups, collapsedIds, onToggleGroup, onIssueClic
           const tableRow = issueRowsByKey.get(row.issue.key);
           if (!tableRow) return null;
           return (
-            <tr key={`${row.groupId}:${row.issue.key}`}>
+            <tr
+              key={`${row.groupId}:${row.issue.key}`}
+              className="taco-issue-row"
+              onClick={(e) => {
+                // Let modifier-clicks fall through to the link defaults (open in
+                // a new tab) instead of hijacking them to open the sidebar.
+                if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+                onIssueClick(row.issue.key);
+              }}
+            >
               {tableRow.getVisibleCells().map((cell) => (
-                <td key={cell.id} className={cell.column.columnDef.meta?.className}>
+                <td
+                  key={cell.id}
+                  className={cell.column.columnDef.meta?.className}
+                  // Inline-editor cells own their clicks (popovers); don't let
+                  // them bubble up and open the detail sidebar.
+                  onClick={
+                    INTERACTIVE_COLUMNS.has(cell.column.id)
+                      ? (e) => e.stopPropagation()
+                      : undefined
+                  }
+                >
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
