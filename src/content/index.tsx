@@ -1,4 +1,3 @@
-import logoSvg from '../../assets/logo-icon.svg?raw';
 import { mountTacoOverlay, unmountTacoOverlay, isOverlayMounted } from './mount';
 
 const BUTTON_ID = 'taco-nav-button';
@@ -14,17 +13,15 @@ function injectNavButton(): void {
   btn.id = BUTTON_ID;
   btn.type = 'button';
   btn.title = 'Open Taco overview (Cmd/Ctrl+Shift+J)';
-  btn.innerHTML = `${logoSvg}<span>Taco</span>`;
-  const svg = btn.querySelector('svg');
-  if (svg) {
-    svg.removeAttribute('width');
-    svg.removeAttribute('height');
+  btn.innerHTML = `<span class="taco-nav-icon">🌮</span><span>Taco</span>`;
+  const icon = btn.querySelector<HTMLElement>('.taco-nav-icon');
+  if (icon) {
     // Absolute-positioned so the text can sit centered in the button without
-    // the logo shifting it off-center.
-    Object.assign(svg.style, {
+    // the emoji shifting it off-center.
+    Object.assign(icon.style, {
       display: 'block',
-      height: '20px',
-      width: 'auto',
+      fontSize: '18px',
+      lineHeight: '1',
       position: 'absolute',
       left: '12px',
       top: '50%',

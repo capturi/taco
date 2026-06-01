@@ -245,7 +245,16 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
     },
   });
 
-  const canSubmit = summary.trim().length > 0 && issueTypeName.length > 0 && !create.isPending;
+  // Domain and Components are required, but only when the project actually
+  // offers them — otherwise there'd be no way to satisfy the requirement.
+  const domainOk = domainOptions.length === 0 || productDomainOptionId !== null;
+  const componentsOk = visibleComponents.length === 0 || componentIds.length > 0;
+  const canSubmit =
+    summary.trim().length > 0 &&
+    issueTypeName.length > 0 &&
+    domainOk &&
+    componentsOk &&
+    !create.isPending;
 
   return (
     <div className="taco-modal-backdrop" onClick={onClose}>
@@ -530,7 +539,9 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
 
           {domainOptions.length > 0 && (
             <div className="taco-modal-field">
-              <span className="taco-modal-label">Domain</span>
+              <span className="taco-modal-label">
+                Domain <span style={{ color: '#de350b', fontWeight: 400 }}>*</span>
+              </span>
               <div className="taco-segmented">
                 {domainOptions.map((d) => (
                   <button
@@ -550,7 +561,9 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
 
           {visibleComponents.length > 0 && (
             <div className="taco-modal-field">
-              <span className="taco-modal-label">Components</span>
+              <span className="taco-modal-label">
+                Components <span style={{ color: '#de350b', fontWeight: 400 }}>*</span>
+              </span>
               <div className="taco-pill-row">
                 {visibleComponents.map((c) => {
                   const isSelected = componentIds.includes(c.id);

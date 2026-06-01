@@ -183,6 +183,22 @@
 
 .taco-button:hover { background: #f4f5f7; }
 
+.taco-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Keep the resting background on hover while disabled (overrides variant
+   hovers below via the :disabled specificity bump). */
+.taco-button:disabled:hover,
+.taco-button.primary:disabled:hover,
+.taco-button.dark:disabled:hover {
+  background: inherit;
+}
+
+.taco-button.primary:disabled:hover { background: #0052cc; }
+.taco-button.dark:disabled:hover { background: #172b4d; }
+
 .taco-button[aria-pressed="true"] {
   background: #deebff;
   color: #0747a6;
@@ -707,6 +723,9 @@
 .taco-epic-pill {
   display: inline-flex;
   align-items: center;
+  /* Left-align (overriding .taco-button's centering) so a long, clipped label
+     keeps its left/right padding instead of overflowing into it. */
+  justify-content: flex-start;
   gap: 6px;
 }
 
