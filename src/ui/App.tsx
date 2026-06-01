@@ -4,7 +4,7 @@ import type { EpicRef, Issue, ProductDomain, User } from '../api/types';
 import { useConfig } from '../lib/config';
 import { applyFilters, EMPTY_FILTERS, type Filters } from '../lib/filter';
 import { groupIssues, type GroupKey } from '../lib/groupBy';
-import { augmentJqlWithFieldIn, buildDefaultJql, defaultProjectKeyFromJql } from '../lib/jql';
+import { augmentJqlWithFieldIn, buildDefaultJql } from '../lib/jql';
 import { usePersistedState } from '../lib/persistedState';
 import { getClient } from './cache';
 import { Toolbar } from './Toolbar';
@@ -23,10 +23,8 @@ export function App({ onClose }: { onClose: () => void }) {
   const { config } = useConfig();
   const [groupKey, setGroupKey] = usePersistedState<GroupKey>('groupKey', 'status');
   const [filters, setFilters] = usePersistedState<Filters>('filters', EMPTY_FILTERS);
-  // Initial JQL seeds from the configured project key on first run; once a JQL
-  // is persisted, it's used as-is and config changes don't overwrite it.
-  const [jql, setJql] = usePersistedState('jql', buildDefaultJql(config.projectKey));
-  const [pendingJql, setPendingJql] = useState(jql);
+  // JQL is fixed in code; the project comes from settings. No longer user-editable.
+  const jql = useMemo(() => buildDefaultJql(config.projectKey), [config.projectKey]);
   const [selectedIssueKey, setSelectedIssueKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -132,9 +130,6 @@ export function App({ onClose }: { onClose: () => void }) {
     <div className="taco-root" role="dialog" aria-label="Taco overview">
       <div className="taco-panel">
         <Toolbar
-          jql={pendingJql}
-          onJqlChange={setPendingJql}
-          onJqlSubmit={() => setJql(pendingJql)}
           groupKey={groupKey}
           onGroupKeyChange={setGroupKey}
           filters={filters}
@@ -186,7 +181,7 @@ export function App({ onClose }: { onClose: () => void }) {
 
       {creating && (
         <CreateIssueDialog
-          projectKey={defaultProjectKeyFromJql(jql, config.projectKey)}
+          projectKey={config.projectKey}
           onClose={() => setCreating(false)}
           onCreated={(key) => {
             setCreating(false);
@@ -197,14 +192,14 @@ export function App({ onClose }: { onClose: () => void }) {
 
       {settingsOpen && (
         <SettingsDialog
-          projectKey={defaultProjectKeyFromJql(jql, config.projectKey)}
+          projectKey={config.projectKey}
           onClose={() => setSettingsOpen(false)}
         />
       )}
 
       {customFiltersOpen && (
         <CustomFiltersDialog
-          projectKey={defaultProjectKeyFromJql(jql, config.projectKey)}
+          projectKey={config.projectKey}
           assignees={allAssignees}
           productDomains={allProductDomains}
           me={me}

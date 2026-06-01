@@ -151,19 +151,34 @@ export class JiraClient {
     let cached = this.projectBoards.get(projectKey);
     if (!cached) {
       cached = (async () => {
-        const res = await fetch(
-          `${this.origin}/rest/agile/1.0/board?projectKeyOrId=${encodeURIComponent(projectKey)}`,
-          { credentials: 'include', headers: { Accept: 'application/json' } },
-        );
-        if (!res.ok) return [];
-        const data = (await res.json()) as {
-          values?: Array<{ id: number; name?: string; type?: string }>;
-        };
-        return (data.values ?? []).map((b) => ({
-          id: b.id,
-          name: b.name ?? `Board ${b.id}`,
-          type: b.type,
-        }));
+        const boards: Board[] = [];
+        let startAt = 0;
+        // The Agile board endpoint paginates (maxResults defaults to 50); page
+        // through until isLast or an empty page so projects with many boards
+        // aren't truncated.
+        for (;;) {
+          const url = new URL(`${this.origin}/rest/agile/1.0/board`);
+          url.searchParams.set('projectKeyOrId', projectKey);
+          url.searchParams.set('maxResults', '50');
+          url.searchParams.set('startAt', String(startAt));
+          const res = await fetch(url, {
+            credentials: 'include',
+            headers: { Accept: 'application/json' },
+          });
+          if (!res.ok) break;
+          const data = (await res.json()) as {
+            values?: Array<{ id: number; name?: string; type?: string }>;
+            isLast?: boolean;
+            maxResults?: number;
+          };
+          const values = data.values ?? [];
+          for (const b of values) {
+            boards.push({ id: b.id, name: b.name ?? `Board ${b.id}`, type: b.type });
+          }
+          if (data.isLast || values.length === 0) break;
+          startAt += data.maxResults ?? values.length;
+        }
+        return boards;
       })();
       this.projectBoards.set(projectKey, cached);
     }

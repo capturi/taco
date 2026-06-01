@@ -7,9 +7,6 @@ import { orderWithMeFirst } from '../lib/users';
 import { UserAvatar } from './UserAvatar';
 
 type Props = {
-  jql: string;
-  onJqlChange: (jql: string) => void;
-  onJqlSubmit: () => void;
   groupKey: GroupKey;
   onGroupKeyChange: (k: GroupKey) => void;
   filters: Filters;
@@ -94,9 +91,6 @@ export function Toolbar(props: Props) {
         />
 
         <OptionsMenu
-          jql={props.jql}
-          onJqlChange={props.onJqlChange}
-          onJqlSubmit={props.onJqlSubmit}
           onSettingsClick={props.onSettingsClick}
           onConfigureCustomFilters={props.onConfigureCustomFilters}
         />
@@ -153,20 +147,11 @@ export function Toolbar(props: Props) {
 }
 
 type OptionsMenuProps = {
-  jql: string;
-  onJqlChange: (jql: string) => void;
-  onJqlSubmit: () => void;
   onSettingsClick: () => void;
   onConfigureCustomFilters: () => void;
 };
 
-function OptionsMenu({
-  jql,
-  onJqlChange,
-  onJqlSubmit,
-  onSettingsClick,
-  onConfigureCustomFilters,
-}: OptionsMenuProps) {
+function OptionsMenu({ onSettingsClick, onConfigureCustomFilters }: OptionsMenuProps) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
@@ -188,11 +173,6 @@ function OptionsMenu({
       document.removeEventListener('keydown', onKey);
     };
   }, [open]);
-
-  const submitAndClose = () => {
-    onJqlSubmit();
-    setOpen(false);
-  };
 
   const runMenuAction = (action: () => void) => {
     action();
@@ -222,30 +202,6 @@ function OptionsMenu({
             </button>
             <button className="taco-button" onClick={() => runMenuAction(onSettingsClick)}>
               Settings…
-            </button>
-          </div>
-
-          <label htmlFor="taco-jql">JQL</label>
-          <textarea
-            id="taco-jql"
-            className="taco-input taco-jql-textarea"
-            value={jql}
-            onChange={(e) => onJqlChange(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                e.preventDefault();
-                submitAndClose();
-              }
-            }}
-            rows={3}
-            spellCheck={false}
-          />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <button className="taco-button" onClick={() => setOpen(false)}>
-              Cancel
-            </button>
-            <button className="taco-button primary" onClick={submitAndClose}>
-              Run
             </button>
           </div>
         </div>
