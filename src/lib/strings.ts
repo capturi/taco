@@ -19,3 +19,17 @@ export function componentDomainRest(componentName: string): string {
   const idx = componentName.indexOf('.');
   return idx === -1 ? componentName : componentName.slice(idx + 1);
 }
+
+// Map each domain's kebab name to its configured icon, so a `<domain>.<rest>`
+// component can be decorated with its domain emoji via componentDomainPrefix.
+export function domainIconsByPrefix(
+  domains: ReadonlyArray<{ id: string; name: string }>,
+  icons: Record<string, string>,
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const d of domains) {
+    const icon = icons[d.id];
+    if (icon) map.set(toKebab(d.name), icon);
+  }
+  return map;
+}

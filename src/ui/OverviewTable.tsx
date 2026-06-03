@@ -11,7 +11,7 @@ import { useConfig } from '../lib/config';
 import { epicColorHex } from '../lib/epicColors';
 import { resolveEpic, type Group } from '../lib/groupBy';
 import { statusRank } from '../lib/status';
-import { componentDomainPrefix, componentDomainRest, toKebab } from '../lib/strings';
+import { componentDomainPrefix, componentDomainRest, domainIconsByPrefix } from '../lib/strings';
 import { getClient } from './cache';
 import { AssigneeCell, SprintCell, StatusCell } from './editors';
 
@@ -167,13 +167,7 @@ function makeColumns(
       cell: (ctx) => {
         const issue = ctx.row.original;
         if (issue.components.length === 0) return null;
-        // Map each domain's kebab name to its emoji so a component can be
-        // decorated with its domain's icon (components are `<domain>.<rest>`).
-        const emojiByPrefix = new Map<string, string>();
-        for (const d of issue.productDomains) {
-          const icon = domainIcons[d.id];
-          if (icon) emojiByPrefix.set(toKebab(d.name), icon);
-        }
+        const emojiByPrefix = domainIconsByPrefix(issue.productDomains, domainIcons);
         return (
           <span className="taco-component-cell">
             {issue.components.map((c) => {

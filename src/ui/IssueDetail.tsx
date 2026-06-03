@@ -110,8 +110,13 @@ export function IssueDetail({ issueKey, onClose, onSelectIssue }: Props) {
                 value={detailQuery.data.summary}
               />
             )}
-            <button className="taco-button" onClick={onClose} aria-label="Close detail view">
-              Close
+            <button
+              className="taco-button"
+              onClick={onClose}
+              aria-label="Close detail view"
+              title="Close detail view"
+            >
+              ✕
             </button>
           </div>
           {detailQuery.data && (

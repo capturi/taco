@@ -1,12 +1,12 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { Component } from '../api/types';
+import type { Component, Issue } from '../api/types';
 import { markdownToAdf } from '../lib/adfMarkdown';
 import { useConfig } from '../lib/config';
 import { useDebouncedValue } from '../lib/useDebouncedValue';
 import { epicColorHex } from '../lib/epicColors';
 import { statusRank } from '../lib/status';
-import { componentDomainPrefix, toKebab } from '../lib/strings';
+import { componentDomainPrefix, domainIconsByPrefix, toKebab } from '../lib/strings';
 import { orderWithMeFirst } from '../lib/users';
 import { getClient } from './cache';
 import { useProductDomainOptions, useProjectComponents } from './queries';
@@ -67,6 +67,11 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
     if (allowedPrefixes.size === 0) return allComponents;
     return allComponents.filter((c) => allowedPrefixes.has(componentDomainPrefix(c.name)));
   }, [allComponents, domainOptions, selectedDomain]);
+
+  const domainIconByPrefix = useMemo(
+    () => domainIconsByPrefix(domainOptions, config.productDomainIcons),
+    [domainOptions, config.productDomainIcons],
+  );
 
   useEffect(() => {
     if (!selectedDomain) return;
@@ -241,7 +246,38 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
       return result;
     },
     onSuccess: (result) => {
-      qc.invalidateQueries({ queryKey: ['issues'] });
+      const chosenStatus = statuses.find((s) => s.name === statusName);
+      const chosenType = types.find((t) => t.name === issueTypeName);
+      const optimistic: Issue = {
+        key: result.key,
+        summary: summary.trim(),
+        status: chosenStatus
+          ? { name: chosenStatus.name, category: chosenStatus.category }
+          : { name: statusName ?? '', category: 'unknown' },
+        assignee: assignees.find((u) => u.accountId === assigneeAccountId) ?? null,
+        reporter: me,
+        priority: null,
+        issueType: chosenType ? { name: chosenType.name, iconUrl: chosenType.iconUrl } : { name: issueTypeName },
+        parent,
+        epic: null,
+        sprint: sprintId !== null ? (allSprints.find((s) => s.id === sprintId) ?? null) : null,
+        productDomains: productDomainOptionId
+          ? domainOptions.filter((d) => d.id === productDomainOptionId)
+          : [],
+        components: componentIds
+          .map((id) => allComponents.find((c) => c.id === id))
+          .filter((c): c is Component => c !== undefined),
+        labels: [],
+        updated: new Date().toISOString(),
+        url: `${window.location.origin}/browse/${result.key}`,
+      };
+      // Jira's JQL search index is eventually consistent: a freshly created issue
+      // isn't returned by search for a few seconds, so refetching the list now
+      // would render it without the new ticket. Insert it optimistically instead;
+      // a later manual/stale refetch reconciles once the index has caught up.
+      qc.setQueriesData<Issue[]>({ queryKey: ['issues'] }, (old) =>
+        old && !old.some((i) => i.key === result.key) ? [optimistic, ...old] : old,
+      );
       onCreated(result.key);
     },
   });
@@ -571,6 +607,7 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
               <div className="taco-pill-row">
                 {visibleComponents.map((c) => {
                   const isSelected = componentIds.includes(c.id);
+                  const icon = domainIconByPrefix.get(componentDomainPrefix(c.name));
                   return (
                     <button
                       key={c.id}
@@ -579,7 +616,7 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
                       aria-pressed={isSelected}
                       onClick={() => toggleComponent(c)}
                     >
-                      {c.name}
+                      {icon ? `${icon} ${c.name}` : c.name}
                     </button>
                   );
                 })}
@@ -589,7 +626,7 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
 
           <div className="taco-modal-field">
             <span className="taco-modal-label">Assignee</span>
-            <div className="taco-user-filter">
+            <div className="taco-user-filter taco-user-filter-lg">
               {orderWithMeFirst(assignees, me).map((u) => {
                 const isSelected = assigneeAccountId === u.accountId;
                 const isMe = me?.accountId === u.accountId;

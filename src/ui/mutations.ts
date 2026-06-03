@@ -85,8 +85,9 @@ export function useIssueMutations() {
       newComponents: Component[];
     }) => client.setIssueComponents(key, componentIds),
     onMutate: ({ key, newComponents }) => patch(key, { components: newComponents }),
-    // No ['issues'] invalidation — components aren't on the Issue table shape,
-    // so the table doesn't need a refresh.
+    // The optimistic patch already updates the table's component column; no
+    // ['issues'] invalidation needed since components carry no server-computed
+    // fields to reconcile.
     onSettled: (_d, _e, vars) => {
       qc.invalidateQueries({ queryKey: ['issue-detail', vars.key] });
     },

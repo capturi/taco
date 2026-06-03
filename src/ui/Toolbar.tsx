@@ -51,15 +51,25 @@ export function Toolbar(props: Props) {
           + Create
         </button>
         <button
-          className="taco-button"
+          className="taco-button taco-icon-button"
           onClick={props.onRefresh}
           title="Refresh issues"
           aria-label="Refresh issues"
           disabled={props.isRefreshing}
         >
-          <span className={props.isRefreshing ? 'taco-spin' : undefined} aria-hidden="true">
-            ↻
-          </span>
+          <svg
+            className={props.isRefreshing ? 'taco-spin' : undefined}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <path d="M21 3v6h-6" />
+          </svg>
         </button>
 
         <span style={{ width: 12 }} />
@@ -131,16 +141,15 @@ export function Toolbar(props: Props) {
           }
         />
 
-        {hasActiveFilters && (
-          <button
-            className="taco-pill-clear taco-filter-clear"
-            onClick={clearFilters}
-            aria-label="Clear all filters"
-            title="Clear all filters"
-          >
-            ✕
-          </button>
-        )}
+        <button
+          className="taco-pill-clear taco-filter-clear"
+          onClick={clearFilters}
+          disabled={!hasActiveFilters}
+          aria-label="Clear all filters"
+          title="Clear all filters"
+        >
+          ✕
+        </button>
       </div>
     </div>
   );

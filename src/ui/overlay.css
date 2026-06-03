@@ -135,7 +135,9 @@
 .taco-segmented button[aria-pressed="true"] {
   background: #deebff;
   color: #0747a6;
-  font-weight: 600;
+  /* Faux-bold via text-shadow, not font-weight, so the active tab doesn't
+     reflow and shift its neighbours. See .taco-button[aria-pressed="true"]. */
+  text-shadow: 0.4px 0 0 currentColor;
 }
 
 .taco-segmented button[aria-pressed="true"]:hover {
@@ -163,8 +165,8 @@
 .taco-button {
   appearance: none;
   box-sizing: border-box;
-  /* Flex-centre so single-glyph buttons (e.g. the ↻ refresh) sit centred and
-     all controls share one height. */
+  /* Flex-centre so single-glyph/icon buttons sit centred and all controls
+     share one height. */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -203,7 +205,10 @@
   background: #deebff;
   color: #0747a6;
   border-color: #b3d4ff;
-  font-weight: 600;
+  /* Faux-bold via text-shadow instead of font-weight: a heavier weight
+     reflows the glyphs and shifts neighbouring buttons; the shadow thickens
+     the strokes without changing the text's measured width. */
+  text-shadow: 0.4px 0 0 currentColor;
 }
 
 .taco-button[aria-pressed="true"]:hover { background: #cde0ff; }
@@ -223,6 +228,22 @@
 }
 
 .taco-button.dark:hover { background: #091e42; }
+
+.taco-icon-button {
+  width: 32px;
+  padding: 0;
+  color: #42526e;
+}
+
+.taco-icon-button svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.taco-icon-button:hover:not(:disabled) {
+  color: #172b4d;
+}
 
 .taco-spin {
   display: inline-block;
@@ -326,6 +347,9 @@
 }
 
 .taco-status-chip-count {
+  /* margin (not the chip's flex gap): the chip also carries .taco-status,
+     whose later `display: inline-block` wins and disables the gap. */
+  margin-left: 6px;
   background: rgba(0, 0, 0, 0.12);
   border-radius: 10px;
   padding: 0 6px;
@@ -477,6 +501,15 @@
   transition: border-color 0.1s, opacity 0.1s, filter 0.1s;
   opacity: 0.55;
   filter: grayscale(40%);
+}
+
+.taco-user-filter-lg .taco-user-pill {
+  width: 40px;
+  height: 40px;
+}
+
+.taco-user-filter-lg .taco-user-pill-fallback {
+  font-size: 16px;
 }
 
 .taco-user-pill:hover {
@@ -810,13 +843,40 @@
   background: rgba(222, 53, 11, 0.08);
 }
 
-/* Clear-all sits at the end of the filter group, set off by a divider. */
+/* Clear-all sits at the end of the filter group, set off by a divider. Sized
+   as a small square so the hover highlight is a tidy rounded chip around the
+   glyph rather than a full-height block. The divider is a sibling pseudo so it
+   doesn't distort the button box or its hover background. */
 .taco-filter-clear {
-  align-self: stretch;
-  margin-left: 8px;
-  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-left: 12px;
+  border-radius: 4px;
+  position: relative;
+}
+
+.taco-filter-clear::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 18px;
   border-left: 1px solid #dfe1e6;
-  border-radius: 0;
+}
+
+.taco-filter-clear:hover:not(:disabled) {
+  color: #de350b;
+  background: rgba(222, 53, 11, 0.08);
+}
+
+.taco-filter-clear:disabled {
+  opacity: 0.4;
 }
 
 .taco-detail-sidebar {
