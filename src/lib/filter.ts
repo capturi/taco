@@ -29,13 +29,16 @@ export function applyFilters(
   // narrowing.
   if (text) {
     return issues.filter((i) => {
-      const hay = `${i.key} ${i.summary} ${i.assignee?.displayName ?? ''} ${i.epic?.summary ?? ''} ${i.productDomain?.name ?? ''}`.toLowerCase();
+      const hay = `${i.key} ${i.summary} ${i.assignee?.displayName ?? ''} ${i.epic?.summary ?? ''} ${i.productDomains.map((d) => d.name).join(' ')}`.toLowerCase();
       return hay.includes(text);
     });
   }
 
   const assigneeSet = filters.assigneeAccountIds.length ? new Set(filters.assigneeAccountIds) : null;
   return issues.filter((i) => {
+    // Done tickets only belong to the current (active) sprint. The JQL pulls done
+    // issues from any open sprint, so drop done ones that aren't in an active sprint.
+    if (i.status.category === 'done' && i.sprint?.state !== 'active') return false;
     if (assigneeSet && (!i.assignee || !assigneeSet.has(i.assignee.accountId))) return false;
     if (filters.currentSprintOnly && i.sprint?.state !== 'active') return false;
     if (customFilter && !matchesCustomFilter(i, customFilter)) return false;
@@ -45,12 +48,12 @@ export function applyFilters(
 
 // A custom filter narrows by each non-empty dimension: assignee/domain/
 // components. Values within a dimension are OR'd; dimensions are AND'd.
-function matchesCustomFilter(issue: Issue, cf: CustomFilter): boolean {
+export function matchesCustomFilter(issue: Issue, cf: CustomFilter): boolean {
   if (cf.assigneeAccountIds.length) {
     if (!issue.assignee || !cf.assigneeAccountIds.includes(issue.assignee.accountId)) return false;
   }
   if (cf.productDomainIds.length) {
-    if (!issue.productDomain || !cf.productDomainIds.includes(issue.productDomain.id)) return false;
+    if (!issue.productDomains.some((d) => cf.productDomainIds.includes(d.id))) return false;
   }
   if (cf.componentIds.length) {
     const ids = new Set(issue.components.map((c) => c.id));

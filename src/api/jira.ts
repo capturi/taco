@@ -287,9 +287,9 @@ export class JiraClient {
           }
         : null,
       sprint: findSprint(data.fields),
-      productDomain: productDomainFieldId
-        ? extractProductDomain(data.fields[productDomainFieldId])
-        : null,
+      productDomains: productDomainFieldId
+        ? extractProductDomains(data.fields[productDomainFieldId])
+        : [],
       components: (data.fields.components ?? [])
         .filter((c): c is { id: string; name: string } => !!c.id && !!c.name)
         .map((c) => ({ id: c.id, name: c.name })),
@@ -543,10 +543,10 @@ export class JiraClient {
     return { id: data.id, key: data.key };
   }
 
-  async setIssueProductDomain(issueKey: string, optionId: string | null): Promise<void> {
+  async setIssueProductDomain(issueKey: string, optionIds: string[]): Promise<void> {
     const fieldId = await this.getProductDomainFieldId();
     if (!fieldId) throw new Error('Product Domain field not found on this Jira instance');
-    const value = optionId ? [{ id: optionId }] : [];
+    const value = optionIds.map((id) => ({ id }));
     const res = await fetch(`${this.origin}/rest/api/3/issue/${encodeURIComponent(issueKey)}`, {
       method: 'PUT',
       credentials: 'include',
@@ -908,7 +908,7 @@ function mapIssue(
       : null,
     epic: mapEpic(f.parent),
     sprint: findSprint(f),
-    productDomain: productDomainFieldId ? extractProductDomain(f[productDomainFieldId]) : null,
+    productDomains: productDomainFieldId ? extractProductDomains(f[productDomainFieldId]) : [],
     components: (f.components ?? [])
       .filter((c): c is { id: string; name?: string } => typeof c?.id === 'string')
       .map((c) => ({ id: c.id, name: c.name ?? '' })),
@@ -977,6 +977,18 @@ function mergeComments(
       created: c.created ?? '',
     }))
     .filter((c) => c.id);
+}
+
+function extractProductDomains(value: unknown): ProductDomain[] {
+  // The Product Domain custom field is multi-select, so it arrives as an array
+  // of option objects. Map every entry; the list view (mapIssue) still surfaces
+  // only the first via extractProductDomain.
+  if (value == null) return [];
+  if (Array.isArray(value)) {
+    return value.map(extractProductDomain).filter((d): d is ProductDomain => d !== null);
+  }
+  const single = extractProductDomain(value);
+  return single ? [single] : [];
 }
 
 function extractProductDomain(value: unknown): ProductDomain | null {

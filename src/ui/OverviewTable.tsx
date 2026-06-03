@@ -4,10 +4,15 @@ import {
   useReactTable,
   type ColumnDef,
 } from '@tanstack/react-table';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import type { Issue, User } from '../api/types';
-import type { Group } from '../lib/groupBy';
+import { useConfig } from '../lib/config';
+import { epicColorHex } from '../lib/epicColors';
+import { resolveEpic, type Group } from '../lib/groupBy';
 import { statusRank } from '../lib/status';
+import { componentDomainPrefix, componentDomainRest, toKebab } from '../lib/strings';
+import { getClient } from './cache';
 import { AssigneeCell, SprintCell, StatusCell } from './editors';
 
 type StatusBreakdown = {
@@ -45,7 +50,23 @@ declare module '@tanstack/react-table' {
   }
 }
 
-function makeColumns(onIssueClick: (issueKey: string) => void): ColumnDef<Issue>[] {
+function makeColumns(
+  onIssueClick: (issueKey: string) => void,
+  epicColorByKey: Map<string, string>,
+  issuesByKey: Map<string, Issue>,
+  domainIcons: Record<string, string>,
+): ColumnDef<Issue>[] {
+  const epicSwatch = (epicKey: string) => (
+    <span
+      className="taco-epic-swatch"
+      style={{
+        background: epicColorHex(epicColorByKey.get(epicKey)) ?? '#dfe1e6',
+        marginRight: 6,
+        verticalAlign: 'middle',
+      }}
+      aria-hidden="true"
+    />
+  );
   const issueLink = (issue: Issue, label: string, className: string) => (
     <a
       className={className}
@@ -116,21 +137,54 @@ function makeColumns(onIssueClick: (issueKey: string) => void): ColumnDef<Issue>
       accessorFn: (i) => i.parent?.summary ?? '',
       cell: (ctx) => {
         const i = ctx.row.original;
-        const parentKey = i.parent?.key ?? i.epic?.key;
-        const parentLabel = i.parent?.summary ?? i.epic?.summary;
+        // Resolve the ancestor epic so grandchildren (e.g. sub-tasks under a
+        // story) get the epic dot too, not just issues parented directly to it.
+        const epic = resolveEpic(i, issuesByKey);
+        const parentKey = i.parent?.key ?? epic?.key;
+        const parentLabel = i.parent?.summary ?? epic?.summary;
         if (!parentKey || !parentLabel) return '';
-        const showEpicInParens =
-          i.epic && i.parent && i.epic.key !== i.parent.key;
+        const showEpicInParens = epic && i.parent && epic.key !== i.parent.key;
         return (
           <span>
+            {epic && epicSwatch(epic.key)}
             {keyLink(parentKey, parentLabel)}
-            {showEpicInParens && i.epic && (
+            {showEpicInParens && (
               <>
                 {' ('}
-                {keyLink(i.epic.key, i.epic.summary)}
+                {keyLink(epic.key, epic.summary)}
                 {')'}
               </>
             )}
+          </span>
+        );
+      },
+    },
+    {
+      id: 'component',
+      header: 'Component',
+      meta: { className: 'taco-nowrap' },
+      accessorFn: (i) => i.components.map((c) => componentDomainRest(c.name)).join(', '),
+      cell: (ctx) => {
+        const issue = ctx.row.original;
+        if (issue.components.length === 0) return null;
+        // Map each domain's kebab name to its emoji so a component can be
+        // decorated with its domain's icon (components are `<domain>.<rest>`).
+        const emojiByPrefix = new Map<string, string>();
+        for (const d of issue.productDomains) {
+          const icon = domainIcons[d.id];
+          if (icon) emojiByPrefix.set(toKebab(d.name), icon);
+        }
+        return (
+          <span className="taco-component-cell">
+            {issue.components.map((c) => {
+              const emoji = emojiByPrefix.get(componentDomainPrefix(c.name));
+              return (
+                <span key={c.id} className="taco-component-chip" title={c.name}>
+                  {emoji && <span className="taco-component-emoji">{emoji}</span>}
+                  {componentDomainRest(c.name)}
+                </span>
+              );
+            })}
           </span>
         );
       },
@@ -163,8 +217,31 @@ type Props = {
 };
 
 export function OverviewTable({ groups, collapsedIds, onToggleGroup, onIssueClick }: Props) {
-  const columns = useMemo(() => makeColumns(onIssueClick), [onIssueClick]);
+  const { config } = useConfig();
+  const client = getClient();
+  const projectEpicsQuery = useQuery({
+    queryKey: ['project-epics', config.projectKey],
+    queryFn: () => client.getProjectEpics(config.projectKey),
+    enabled: !!config.projectKey,
+    staleTime: 5 * 60_000,
+  });
+  const epicColorByKey = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const e of projectEpicsQuery.data ?? []) {
+      if (e.colorKey) m.set(e.key, e.colorKey);
+    }
+    return m;
+  }, [projectEpicsQuery.data]);
   const flatIssues = useMemo(() => groups.flatMap((g) => g.issues), [groups]);
+  const issuesByKey = useMemo(
+    () => new Map(flatIssues.map((i) => [i.key, i])),
+    [flatIssues],
+  );
+  const columns = useMemo(
+    () =>
+      makeColumns(onIssueClick, epicColorByKey, issuesByKey, config.productDomainIcons),
+    [onIssueClick, epicColorByKey, issuesByKey, config.productDomainIcons],
+  );
   const groupedRows = useMemo<GroupedRow[]>(() => {
     const rows: GroupedRow[] = [];
     for (const group of groups) {

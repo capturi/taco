@@ -28,7 +28,11 @@ export function augmentJqlWithFieldIn(
 ): string {
   if (values.length === 0) return jql;
   const numericFieldId = fieldId.replace(/^customfield_/, '');
-  const valueList = values.map((v) => `"${escapeJqlString(v)}"`).join(', ');
+  // Select-list option IDs must be passed unquoted — a quoted value is matched
+  // against the option's display text, not its id, and matches nothing.
+  const valueList = values
+    .map((v) => (/^\d+$/.test(v) ? v : `"${escapeJqlString(v)}"`))
+    .join(', ');
   const clause = `cf[${numericFieldId}] in (${valueList})`;
 
   const orderBy = /\bORDER\s+BY\b/i.exec(jql);

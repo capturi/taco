@@ -9,7 +9,7 @@ export type Issue = {
   parent: { key: string; summary: string } | null;
   epic: EpicRef | null;
   sprint: Sprint | null;
-  productDomain: ProductDomain | null;
+  productDomains: ProductDomain[];
   components: Component[];
   labels: string[];
   updated: string;
@@ -50,7 +50,7 @@ export type IssueDetail = {
   assignee: User | null;
   parent: { key: string; summary: string } | null;
   sprint: Sprint | null;
-  productDomain: ProductDomain | null;
+  productDomains: ProductDomain[];
   components: Component[];
   descriptionHtml: string;
   descriptionAdf: ADFDocLike | null;

@@ -153,14 +153,14 @@ export function IssueDetail({ issueKey, onClose, onSelectIssue }: Props) {
             <MetaField label="Domain">
               <ProductDomainCell
                 issueKey={detailQuery.data.key}
-                productDomain={detailQuery.data.productDomain ?? null}
+                productDomains={detailQuery.data.productDomains ?? []}
               />
             </MetaField>
             <MetaField label="Components">
               <ComponentsCell
                 issueKey={detailQuery.data.key}
                 components={detailQuery.data.components ?? []}
-                productDomain={detailQuery.data.productDomain ?? null}
+                productDomains={detailQuery.data.productDomains ?? []}
               />
             </MetaField>
           </div>

@@ -159,7 +159,8 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
   // hard-coded rank. (Assumes the workflow has no transition rules so any
   // status is reachable; otherwise the picker may offer unreachable values.)
   const statuses = useMemo(() => {
-    if (config.favoriteStatuses.length > 0) return config.favoriteStatuses;
+    const shown = config.favoriteStatuses.filter((s) => s.shown !== false);
+    if (shown.length > 0) return shown;
     return [...observedStatuses].sort((a, b) => statusRank(a.name) - statusRank(b.name));
   }, [config.favoriteStatuses, observedStatuses]);
 
@@ -543,18 +544,21 @@ export function CreateIssueDialog({ projectKey, onClose, onCreated }: Props) {
                 Domain <span style={{ color: '#de350b', fontWeight: 400 }}>*</span>
               </span>
               <div className="taco-segmented">
-                {domainOptions.map((d) => (
-                  <button
-                    key={d.id}
-                    type="button"
-                    aria-pressed={productDomainOptionId === d.id}
-                    onClick={() =>
-                      setProductDomainOptionId(productDomainOptionId === d.id ? null : d.id)
-                    }
-                  >
-                    {d.name}
-                  </button>
-                ))}
+                {domainOptions.map((d) => {
+                  const icon = config.productDomainIcons[d.id];
+                  return (
+                    <button
+                      key={d.id}
+                      type="button"
+                      aria-pressed={productDomainOptionId === d.id}
+                      onClick={() =>
+                        setProductDomainOptionId(productDomainOptionId === d.id ? null : d.id)
+                      }
+                    >
+                      {icon ? `${icon} ${d.name}` : d.name}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}

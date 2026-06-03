@@ -13,3 +13,9 @@ export function componentDomainPrefix(componentName: string): string {
   const idx = componentName.indexOf('.');
   return idx === -1 ? '' : componentName.slice(0, idx);
 }
+
+// The part after the first '.' in a component name, or the whole name if none.
+export function componentDomainRest(componentName: string): string {
+  const idx = componentName.indexOf('.');
+  return idx === -1 ? componentName : componentName.slice(idx + 1);
+}

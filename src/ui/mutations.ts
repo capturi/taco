@@ -66,12 +66,12 @@ export function useIssueMutations() {
   });
 
   const setProductDomain = useMutation({
-    mutationFn: ({ key, optionId }: {
+    mutationFn: ({ key, optionIds }: {
       key: string;
-      optionId: string | null;
-      newProductDomain: ProductDomain | null;
-    }) => client.setIssueProductDomain(key, optionId),
-    onMutate: ({ key, newProductDomain }) => patch(key, { productDomain: newProductDomain }),
+      optionIds: string[];
+      newProductDomains: ProductDomain[];
+    }) => client.setIssueProductDomain(key, optionIds),
+    onMutate: ({ key, newProductDomains }) => patch(key, { productDomains: newProductDomains }),
     onSettled: (_d, _e, vars) => {
       qc.invalidateQueries({ queryKey: ['issues'] });
       qc.invalidateQueries({ queryKey: ['issue-detail', vars.key] });

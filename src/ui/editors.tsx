@@ -84,8 +84,9 @@ function StatusEditor({ issueKey, close }: { issueKey: string; close: () => void
   // names; transitions without a matching favorite are hidden.
   const orderedTransitions = useMemo(() => {
     const transitions = transitionsQuery.data ?? [];
-    if (config.favoriteStatuses.length === 0) return transitions;
-    return config.favoriteStatuses
+    const shown = config.favoriteStatuses.filter((s) => s.shown !== false);
+    if (shown.length === 0) return transitions;
+    return shown
       .map((s) => transitions.find((t) => t.to.name.toLowerCase() === s.name.toLowerCase()))
       .filter((t): t is NonNullable<typeof t> => !!t);
   }, [transitionsQuery.data, config.favoriteStatuses]);
@@ -254,14 +255,26 @@ function SprintEditor({ issueKey, close }: { issueKey: string; close: () => void
 }
 
 
-type ProductDomainCellProps = { issueKey: string; productDomain: ProductDomain | null };
+type ProductDomainCellProps = { issueKey: string; productDomains: ProductDomain[] };
 
-export function ProductDomainCell({ issueKey, productDomain }: ProductDomainCellProps) {
+export function ProductDomainCell({ issueKey, productDomains }: ProductDomainCellProps) {
+  const { config } = useConfig();
   return (
-    <Popover trigger={<span>{productDomain?.name ?? '—'}</span>}>
-      {(close) => (
-        <ProductDomainEditor issueKey={issueKey} current={productDomain} close={close} />
-      )}
+    <Popover
+      trigger={
+        <span>
+          {productDomains.length === 0
+            ? '—'
+            : productDomains
+                .map((d) => {
+                  const icon = config.productDomainIcons[d.id];
+                  return icon ? `${icon} ${d.name}` : d.name;
+                })
+                .join(', ')}
+        </span>
+      }
+    >
+      {() => <ProductDomainEditor issueKey={issueKey} current={productDomains} />}
     </Popover>
   );
 }
@@ -269,46 +282,42 @@ export function ProductDomainCell({ issueKey, productDomain }: ProductDomainCell
 function ProductDomainEditor({
   issueKey,
   current,
-  close,
 }: {
   issueKey: string;
-  current: ProductDomain | null;
-  close: () => void;
+  current: ProductDomain[];
 }) {
+  const { config } = useConfig();
   const { options, isPending } = useProductDomainOptions();
   const { setProductDomain } = useIssueMutations();
 
-  const pick = (next: ProductDomain | null) => {
+  // Multi-select: each click toggles a domain and saves immediately, leaving the
+  // popover open so several can be picked in a row.
+  const toggle = (d: ProductDomain) => {
+    const has = current.some((c) => c.id === d.id);
+    const next = has ? current.filter((c) => c.id !== d.id) : [...current, d];
     setProductDomain.mutate({
       key: issueKey,
-      optionId: next?.id ?? null,
-      newProductDomain: next,
+      optionIds: next.map((c) => c.id),
+      newProductDomains: next,
     });
-    close();
   };
 
   return (
     <ul className="taco-cell-list">
-      <li>
-        <button
-          className="taco-cell-option"
-          aria-pressed={current === null}
-          onClick={() => pick(null)}
-        >
-          <span style={{ color: '#5e6c84' }}>No domain</span>
-        </button>
-      </li>
-      {options.map((d) => (
-        <li key={d.id}>
-          <button
-            className="taco-cell-option"
-            aria-pressed={current?.id === d.id}
-            onClick={() => pick(d)}
-          >
-            {d.name}
-          </button>
-        </li>
-      ))}
+      {options.map((d) => {
+        const icon = config.productDomainIcons[d.id];
+        return (
+          <li key={d.id}>
+            <button
+              className="taco-cell-option"
+              aria-pressed={current.some((c) => c.id === d.id)}
+              onClick={() => toggle(d)}
+            >
+              {icon ? `${icon} ${d.name}` : d.name}
+            </button>
+          </li>
+        );
+      })}
       {isPending && <li className="taco-cell-loading">Loading…</li>}
     </ul>
   );
@@ -317,10 +326,10 @@ function ProductDomainEditor({
 type ComponentsCellProps = {
   issueKey: string;
   components: Component[];
-  productDomain: ProductDomain | null;
+  productDomains: ProductDomain[];
 };
 
-export function ComponentsCell({ issueKey, components, productDomain }: ComponentsCellProps) {
+export function ComponentsCell({ issueKey, components, productDomains }: ComponentsCellProps) {
   return (
     <Popover
       trigger={
@@ -333,7 +342,7 @@ export function ComponentsCell({ issueKey, components, productDomain }: Componen
         <ComponentsEditor
           issueKey={issueKey}
           current={components}
-          productDomain={productDomain}
+          productDomains={productDomains}
           close={close}
         />
       )}
@@ -344,12 +353,12 @@ export function ComponentsCell({ issueKey, components, productDomain }: Componen
 function ComponentsEditor({
   issueKey,
   current,
-  productDomain,
+  productDomains,
   close,
 }: {
   issueKey: string;
   current: Component[];
-  productDomain: ProductDomain | null;
+  productDomains: ProductDomain[];
   close: () => void;
 }) {
   const { config } = useConfig();
@@ -365,9 +374,9 @@ function ComponentsEditor({
   const { setComponents } = useIssueMutations();
 
   const allowedPrefixes = useMemo(() => {
-    if (productDomain) return new Set([toKebab(productDomain.name)]);
+    if (productDomains.length > 0) return new Set(productDomains.map((d) => toKebab(d.name)));
     return new Set(config.favoriteProductDomains.map((d) => toKebab(d.name)));
-  }, [productDomain, config.favoriteProductDomains]);
+  }, [productDomains, config.favoriteProductDomains]);
 
   const visible = useMemo(() => {
     if (allowedPrefixes.size === 0) return all;

@@ -47,7 +47,7 @@ export function mountTacoOverlay(): void {
     <StrictMode>
       <PersistQueryClientProvider
         client={queryClient}
-        persistOptions={{ persister, maxAge: 24 * 60 * 60_000 }}
+        persistOptions={{ persister, maxAge: 24 * 60 * 60_000, buster: 'productDomains-v2' }}
       >
         <App onClose={unmountTacoOverlay} />
       </PersistQueryClientProvider>

@@ -5,9 +5,18 @@ import type { Issue, IssueType, ProductDomain, User } from '../api/types';
 // All fields are optional on disk so new fields can be added without
 // invalidating older stored configs — defaults are merged in on read.
 //
-// Array order is meaningful for favoriteStatuses — it controls how
-// statuses are ordered in the create dialog, table popover, and detail
-// sidebar.
+// Array order is meaningful for favoriteStatuses — it controls how status
+// groups are ordered in the overview table (all statuses), and how the shown
+// subset is ordered in the create dialog, table popover, and detail sidebar.
+export type StatusPref = {
+  name: string;
+  category: Issue['status']['category'];
+  // Whether this status appears in the create dialog and status-change
+  // dropdowns. The table sort uses every entry regardless of this flag.
+  // Legacy configs lack the field; treat missing as shown (see `s.shown !== false`).
+  shown: boolean;
+};
+
 export type Config = {
   // Jira project key the user works in. Used as the default project for new
   // tickets, settings lookups (statuses, boards, components), and to seed the
@@ -15,7 +24,10 @@ export type Config = {
   projectKey: string;
   favoriteUsers: User[];
   favoriteProductDomains: ProductDomain[];
-  favoriteStatuses: Issue['status'][];
+  // Optional emoji icon per domain, keyed by domain id. Shown next to the
+  // domain name in the create dialog and the detail editor dropdown.
+  productDomainIcons: Record<string, string>;
+  favoriteStatuses: StatusPref[];
   // Issue types shown in the create dialog and in what order. Empty = show all
   // non-subtask types reported by the project.
   favoriteIssueTypes: IssueType[];
@@ -53,6 +65,7 @@ const DEFAULT_CONFIG: Config = {
   projectKey: '',
   favoriteUsers: [],
   favoriteProductDomains: [],
+  productDomainIcons: {},
   favoriteStatuses: [],
   favoriteIssueTypes: [],
   defaultCreateStatus: null,

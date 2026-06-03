@@ -12,6 +12,7 @@ import { OverviewTable } from './OverviewTable';
 import { IssueDetail } from './IssueDetail';
 import { CreateIssueDialog } from './CreateIssueDialog';
 import { SettingsDialog } from './SettingsDialog';
+import { IntroDialog } from './IntroDialog';
 import { CustomFiltersDialog } from './CustomFiltersDialog';
 import { SessionProvider } from './session';
 
@@ -28,6 +29,11 @@ export function App({ onClose }: { onClose: () => void }) {
   const [selectedIssueKey, setSelectedIssueKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  // First run (nothing configured yet) greets the user with the intro modal,
+  // where they can paste a configuration or choose to start from scratch.
+  const [introOpen, setIntroOpen] = useState(
+    () => config.favoriteProductDomains.length === 0,
+  );
   const [customFiltersOpen, setCustomFiltersOpen] = useState(false);
 
   // Resolve the Product Domain custom field id once; used to pre-filter the
@@ -48,13 +54,15 @@ export function App({ onClose }: { onClose: () => void }) {
     );
   }, [jql, config.favoriteProductDomains, domainFieldIdQuery.data]);
 
+  // Domains are required: with none selected we don't load anything (the user
+  // is prompted to pick at least one in settings). When some are selected we
+  // wait for the field id to land before firing so the search is scoped from
+  // the start rather than briefly fetching the whole project.
+  const needsOnboarding = config.favoriteProductDomains.length === 0;
   const issuesQuery = useQuery({
     queryKey: ['issues', effectiveJql],
     queryFn: () => client.searchAll(effectiveJql),
-    // If favorites are set we must wait for the field id to land before firing
-    // the search — otherwise we'd fetch unfiltered issues for a moment.
-    enabled:
-      config.favoriteProductDomains.length === 0 || domainFieldIdQuery.data !== undefined,
+    enabled: !needsOnboarding && domainFieldIdQuery.data !== undefined,
   });
 
   const meQuery = useQuery({
@@ -73,7 +81,14 @@ export function App({ onClose }: { onClose: () => void }) {
     () => applyFilters(issues, filters, activeCustomFilter),
     [issues, filters, activeCustomFilter],
   );
-  const groups = useMemo(() => groupIssues(filtered, groupKey), [filtered, groupKey]);
+  const statusOrder = useMemo(
+    () => config.favoriteStatuses.map((s) => s.name),
+    [config.favoriteStatuses],
+  );
+  const groups = useMemo(
+    () => groupIssues(filtered, groupKey, statusOrder),
+    [filtered, groupKey, statusOrder],
+  );
 
   const derivedAssignees = useMemo(() => collectAssignees(issues), [issues]);
   const derivedProductDomains = useMemo(() => collectProductDomains(issues), [issues]);
@@ -148,8 +163,24 @@ export function App({ onClose }: { onClose: () => void }) {
         />
 
         <div className="taco-body">
-          {showLoading && <div className="taco-loading">Loading issues…</div>}
-          {showError && (
+          {needsOnboarding && (
+            <div className="taco-empty">
+              Select at least one product domain to load tickets.
+              <div style={{ marginTop: 12 }}>
+                <button
+                  type="button"
+                  className="taco-button primary"
+                  onClick={() => setSettingsOpen(true)}
+                >
+                  Choose domains
+                </button>
+              </div>
+            </div>
+          )}
+          {!needsOnboarding && showLoading && (
+            <div className="taco-loading">Loading issues…</div>
+          )}
+          {!needsOnboarding && showError && (
             <div className="taco-error">
               Failed to load: {issuesQuery.error instanceof Error ? issuesQuery.error.message : String(issuesQuery.error)}
               <div style={{ marginTop: 8, fontSize: 12 }}>
@@ -157,10 +188,10 @@ export function App({ onClose }: { onClose: () => void }) {
               </div>
             </div>
           )}
-          {!showLoading && !showError && groups.length === 0 && (
+          {!needsOnboarding && !showLoading && !showError && groups.length === 0 && (
             <div className="taco-empty">No issues match the current filters.</div>
           )}
-          {!showLoading && !showError && groups.length > 0 && (
+          {!needsOnboarding && !showLoading && !showError && groups.length > 0 && (
             <OverviewTable
               groups={groups}
               collapsedIds={collapsed}
@@ -186,6 +217,16 @@ export function App({ onClose }: { onClose: () => void }) {
           onCreated={(key) => {
             setCreating(false);
             setSelectedIssueKey(key);
+          }}
+        />
+      )}
+
+      {introOpen && (
+        <IntroDialog
+          onImported={() => setIntroOpen(false)}
+          onStartFromScratch={() => {
+            setIntroOpen(false);
+            setSettingsOpen(true);
           }}
         />
       )}
@@ -224,8 +265,9 @@ function collectAssignees(issues: Issue[]): User[] {
 function collectProductDomains(issues: Issue[]): ProductDomain[] {
   const seen = new Map<string, ProductDomain>();
   for (const i of issues) {
-    if (i.productDomain && !seen.has(i.productDomain.id))
-      seen.set(i.productDomain.id, i.productDomain);
+    for (const d of i.productDomains) {
+      if (!seen.has(d.id)) seen.set(d.id, d);
+    }
   }
   return [...seen.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
