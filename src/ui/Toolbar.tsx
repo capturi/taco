@@ -31,6 +31,7 @@ export function Toolbar(props: Props) {
   const toggleCurrentSprint = () =>
     onFiltersChange({ ...filters, currentSprintOnly: !filters.currentSprintOnly });
 
+  const searching = filters.text.trim().length > 0;
   const hasActiveFilters =
     filters.currentSprintOnly ||
     filters.assigneeAccountIds.length > 0 ||
@@ -114,7 +115,12 @@ export function Toolbar(props: Props) {
         </button>
       </div>
 
-      <div className="taco-filter-group">
+      <div className={`taco-filter-group${searching ? ' taco-filter-group-searching' : ''}`}>
+        {searching && (
+          <span className="taco-search-mode" role="status">
+            Search mode · filters off
+          </span>
+        )}
         <button
           className="taco-button"
           aria-pressed={filters.currentSprintOnly}

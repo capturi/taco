@@ -26,7 +26,8 @@ export function applyFilters(
   const text = filters.text.trim().toLowerCase();
   // Text search bypasses the toolbar filters — when the user types, they want
   // to find the issue regardless of the current sprint / assignee / domain
-  // narrowing.
+  // narrowing. The toolbar surfaces a "search mode" badge so this override is
+  // visible (otherwise stale search text silently disables the filters).
   if (text) {
     return issues.filter((i) => {
       const hay = `${i.key} ${i.summary} ${i.assignee?.displayName ?? ''} ${i.epic?.summary ?? ''} ${i.productDomains.map((d) => d.name).join(' ')}`.toLowerCase();

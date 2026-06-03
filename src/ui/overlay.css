@@ -107,6 +107,23 @@
   background: #fafbfc;
 }
 
+/* While searching, the toolbar filters are bypassed (see applyFilters). Dim
+   them so it's clear they aren't in effect; the badge stays full-opacity. */
+.taco-filter-group-searching > :not(.taco-search-mode) {
+  opacity: 0.4;
+}
+
+.taco-search-mode {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0747a6;
+  background: #deebff;
+  border-radius: 4px;
+  padding: 2px 8px;
+}
+
 .taco-segmented {
   box-sizing: border-box;
   display: inline-flex;
