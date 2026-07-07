@@ -326,10 +326,11 @@ function dedupeMarks(marks: ADFMark[]): ADFMark[] {
   return [...seen.values()];
 }
 
-// Parse our round-trip scheme `taco:media:<collection>:<id>` so existing
-// mediaSingle nodes (already-embedded images Jira created) survive a re-save.
-// New issue attachments don't go through here — Jira's renderer doesn't accept
-// our attachment-id-as-media-id substitution, so pasted images stay as links.
+// Parse our round-trip scheme `taco:media:<collection>:<id>` so both existing
+// mediaSingle nodes (images Jira already embedded) and freshly pasted images
+// survive a save as inline media. For pasted images the id is the Media Services
+// UUID resolved from the attachment-content redirect (see getAttachmentMedia) —
+// the numeric attachment id alone is NOT accepted by Jira's renderer.
 function parseMediaUrl(href: string): { id: string; collection: string } | null {
   if (href.startsWith('taco:media:')) {
     const rest = href.slice('taco:media:'.length);

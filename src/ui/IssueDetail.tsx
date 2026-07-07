@@ -120,14 +120,17 @@ export function IssueDetail({ issueKey, onClose, onSelectIssue }: Props) {
             </button>
           </div>
           {detailQuery.data && (
-            <a
-              className="taco-key"
-              href={detailQuery.data.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {detailQuery.data.key}
-            </a>
+            <div className="taco-detail-key-row">
+              <a
+                className="taco-key"
+                href={detailQuery.data.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {detailQuery.data.key}
+              </a>
+              <CopyKeyButton issueKey={detailQuery.data.key} summary={detailQuery.data.summary} />
+            </div>
           )}
         </header>
 
@@ -222,6 +225,41 @@ export function IssueDetail({ issueKey, onClose, onSelectIssue }: Props) {
 
         {detailQuery.data && <DevInfoSection issueId={detailQuery.data.id} />}
     </aside>
+  );
+}
+
+function CopyKeyButton({ issueKey, summary }: { issueKey: string; summary: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(`${issueKey}: ${summary}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard access can be denied by the browser; there's nothing more we can do here.
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className="taco-button taco-icon-button"
+      onClick={copy}
+      title={copied ? 'Copied!' : 'Copy key and summary'}
+      aria-label="Copy key and summary"
+    >
+      {copied ? (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <rect x="9" y="9" width="13" height="13" rx="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      )}
+    </button>
   );
 }
 
@@ -401,8 +439,16 @@ function DescriptionSection({
     setUploadError(null);
     setUploading((n) => n + 1);
     try {
-      const att = await getClient().uploadAttachment(issueKey, file);
-      insertAtCursor(`\n![${att.filename}](${att.contentUrl})\n`);
+      const client = getClient();
+      const att = await client.uploadAttachment(issueKey, file);
+      // Embed inline via the media UUID so Jira renders it as an image, not a
+      // link. The `taco:media:` scheme is what markdownToAdf turns into an ADF
+      // mediaSingle node; fall back to a plain link if the UUID can't be resolved.
+      const media = await client.getAttachmentMedia(att.id);
+      const href = media
+        ? `taco:media:${encodeURIComponent(media.collection)}:${encodeURIComponent(media.id)}`
+        : att.contentUrl;
+      insertAtCursor(`\n![${att.filename}](${href})\n`);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : String(err));
     } finally {

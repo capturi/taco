@@ -213,10 +213,11 @@ type Props = {
 export function OverviewTable({ groups, collapsedIds, onToggleGroup, onIssueClick }: Props) {
   const { config } = useConfig();
   const client = getClient();
+  const primaryProjectKey = config.projectKeys[0] ?? '';
   const projectEpicsQuery = useQuery({
-    queryKey: ['project-epics', config.projectKey],
-    queryFn: () => client.getProjectEpics(config.projectKey),
-    enabled: !!config.projectKey,
+    queryKey: ['project-epics', primaryProjectKey],
+    queryFn: () => client.getProjectEpics(primaryProjectKey),
+    enabled: !!primaryProjectKey,
     staleTime: 5 * 60_000,
   });
   const epicColorByKey = useMemo(() => {

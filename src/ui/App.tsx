@@ -24,8 +24,11 @@ export function App({ onClose }: { onClose: () => void }) {
   const { config } = useConfig();
   const [groupKey, setGroupKey] = usePersistedState<GroupKey>('groupKey', 'status');
   const [filters, setFilters] = usePersistedState<Filters>('filters', EMPTY_FILTERS);
-  // JQL is fixed in code; the project comes from settings. No longer user-editable.
-  const jql = useMemo(() => buildDefaultJql(config.projectKey), [config.projectKey]);
+  // JQL is fixed in code; the project(s) come from settings. No longer user-editable.
+  const jql = useMemo(() => buildDefaultJql(config.projectKeys), [config.projectKeys]);
+  // First configured project is "the" project for things that only make sense
+  // for one: creating a ticket, and settings lookups (statuses, boards, components).
+  const primaryProjectKey = config.projectKeys[0] ?? '';
   const [selectedIssueKey, setSelectedIssueKey] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -212,7 +215,7 @@ export function App({ onClose }: { onClose: () => void }) {
 
       {creating && (
         <CreateIssueDialog
-          projectKey={config.projectKey}
+          projectKey={primaryProjectKey}
           onClose={() => setCreating(false)}
           onCreated={(key) => {
             setCreating(false);
@@ -233,14 +236,14 @@ export function App({ onClose }: { onClose: () => void }) {
 
       {settingsOpen && (
         <SettingsDialog
-          projectKey={config.projectKey}
+          projectKey={primaryProjectKey}
           onClose={() => setSettingsOpen(false)}
         />
       )}
 
       {customFiltersOpen && (
         <CustomFiltersDialog
-          projectKey={config.projectKey}
+          projectKey={primaryProjectKey}
           assignees={allAssignees}
           productDomains={allProductDomains}
           me={me}

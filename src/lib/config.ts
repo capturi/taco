@@ -18,10 +18,12 @@ export type StatusPref = {
 };
 
 export type Config = {
-  // Jira project key the user works in. Used as the default project for new
-  // tickets, settings lookups (statuses, boards, components), and to seed the
-  // initial JQL on first run. Empty string means "not configured yet".
-  projectKey: string;
+  // Jira project keys the user works in. The overview query pulls issues from
+  // all of them. The first key is "the" project for things that are
+  // inherently single-project: the default for new tickets, and settings
+  // lookups (statuses, boards, components). Empty array means "not configured
+  // yet".
+  projectKeys: string[];
   favoriteUsers: User[];
   favoriteProductDomains: ProductDomain[];
   // Optional emoji icon per domain, keyed by domain id. Shown next to the
@@ -62,7 +64,7 @@ export type CustomFilter = {
 
 const STORAGE_KEY = 'taco.config';
 const DEFAULT_CONFIG: Config = {
-  projectKey: '',
+  projectKeys: [],
   favoriteUsers: [],
   favoriteProductDomains: [],
   productDomainIcons: {},
@@ -126,5 +128,13 @@ export function useConfig(): {
   const stored = useSyncExternalStore(subscribe, getSnapshot);
   const update = useCallback((patch: Partial<Config>) => setConfig(patch), []);
   const replace = useCallback((next: Partial<Config>) => replaceConfig(next), []);
-  return { config: { ...DEFAULT_CONFIG, ...stored }, update, replace };
+  return { config: { ...DEFAULT_CONFIG, ...stored, projectKeys: migrateProjectKeys(stored) }, update, replace };
+}
+
+// Older configs stored a single `projectKey: string` — fold it into the new
+// array field so existing users don't lose their configured project.
+function migrateProjectKeys(stored: Partial<Config> & { projectKey?: string }): string[] {
+  if (stored.projectKeys) return stored.projectKeys;
+  if (stored.projectKey) return [stored.projectKey];
+  return DEFAULT_CONFIG.projectKeys;
 }

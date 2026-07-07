@@ -428,6 +428,24 @@
 
 .taco-key:hover { text-decoration: underline; }
 
+.taco-detail-key-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.taco-detail-key-row .taco-icon-button {
+  width: 20px;
+  min-height: 20px;
+  border: none;
+  background: transparent;
+}
+
+.taco-detail-key-row .taco-icon-button svg {
+  width: 12px;
+  height: 12px;
+}
+
 .taco-summary {
   color: #172b4d;
   text-decoration: none;

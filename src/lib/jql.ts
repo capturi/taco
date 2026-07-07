@@ -5,9 +5,12 @@ export function defaultProjectKeyFromJql(jql: string, fallback = ''): string {
   return m?.[1] ?? fallback;
 }
 
-export function buildDefaultJql(projectKey: string): string {
-  if (!projectKey) return '';
-  return `(project = ${projectKey}) AND (statusCategory != Done OR sprint in openSprints()) ORDER BY updated DESC`;
+export function buildDefaultJql(projectKeys: string[]): string {
+  const keys = projectKeys.filter(Boolean);
+  if (keys.length === 0) return '';
+  const projectClause =
+    keys.length === 1 ? `project = ${keys[0]}` : `project in (${keys.join(', ')})`;
+  return `(${projectClause}) AND (statusCategory != Done OR sprint in openSprints()) ORDER BY updated DESC`;
 }
 
 export function projectKeyFromIssueKey(issueKey: string): string {

@@ -44,9 +44,9 @@ export function SettingsDialog({ projectKey, onClose }: Props) {
         {jsonOpen && <JsonImportExport />}
 
         <div className="taco-modal-body">
-          <ProjectKeySection
-            projectKey={config.projectKey}
-            onChange={(projectKey) => update({ projectKey })}
+          <ProjectKeysSection
+            projectKeys={config.projectKeys}
+            onChange={(projectKeys) => update({ projectKeys })}
           />
           <FavoritePeopleSection
             favorites={config.favoriteUsers}
@@ -152,28 +152,105 @@ function JsonImportExport() {
   );
 }
 
-function ProjectKeySection({
-  projectKey,
+function ProjectKeysSection({
+  projectKeys,
   onChange,
 }: {
-  projectKey: string;
-  onChange: (next: string) => void;
+  projectKeys: string[];
+  onChange: (next: string[]) => void;
 }) {
+  const [draft, setDraft] = useState('');
+
+  const add = () => {
+    const key = draft.trim().toUpperCase();
+    setDraft('');
+    if (!key || projectKeys.includes(key)) return;
+    onChange([...projectKeys, key]);
+  };
+  const remove = (idx: number) => onChange(projectKeys.filter((_, i) => i !== idx));
+  const move = (idx: number, delta: number) => {
+    const target = idx + delta;
+    if (target < 0 || target >= projectKeys.length) return;
+    const next = projectKeys.slice();
+    [next[idx], next[target]] = [next[target], next[idx]];
+    onChange(next);
+  };
+
   return (
     <section className="taco-modal-field">
-      <span className="taco-modal-label">Project key</span>
+      <span className="taco-modal-label">Project keys</span>
       <p className="taco-settings-help">
-        The Jira project you work in. Used as the default for new tickets, settings lookups, and to
-        seed your JQL on first run. Already-saved JQL is left alone.
+        Jira projects to pull tickets from — the overview table loads issues from all of them. The
+        first one is the default for new tickets and for the settings lookups below (statuses,
+        boards, components).
       </p>
-      <input
-        className="taco-input"
-        value={projectKey}
-        onChange={(e) => onChange(e.target.value.trim().toUpperCase())}
-        placeholder="e.g. ABC"
-        spellCheck={false}
-        autoCapitalize="characters"
-      />
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
+          className="taco-input"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              add();
+            }
+          }}
+          placeholder="e.g. ABC"
+          spellCheck={false}
+          autoCapitalize="characters"
+        />
+        <button type="button" className="taco-button" onClick={add} disabled={!draft.trim()}>
+          Add
+        </button>
+      </div>
+
+      {projectKeys.length === 0 ? (
+        <p className="taco-detail-empty">No project configured yet.</p>
+      ) : (
+        <SortableList
+          className="taco-settings-status-list"
+          items={projectKeys}
+          getKey={(k) => k}
+          onReorder={onChange}
+          renderItem={(k, idx) => (
+            <>
+              <span className="taco-key" style={{ flex: 1 }}>
+                {k}
+                {idx === 0 ? ' (default)' : ''}
+              </span>
+              <button
+                type="button"
+                className="taco-button"
+                onClick={() => move(idx, -1)}
+                disabled={idx === 0}
+                aria-label={`Move ${k} up`}
+                title="Move up"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                className="taco-button"
+                onClick={() => move(idx, 1)}
+                disabled={idx === projectKeys.length - 1}
+                aria-label={`Move ${k} down`}
+                title="Move down"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                className="taco-pill-clear"
+                onClick={() => remove(idx)}
+                aria-label={`Remove ${k}`}
+                title="Remove"
+              >
+                ✕
+              </button>
+            </>
+          )}
+        />
+      )}
     </section>
   );
 }

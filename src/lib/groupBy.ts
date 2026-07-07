@@ -26,6 +26,13 @@ export function groupIssues(
     }
     group.issues.push(issue);
   }
+  // Within each group, order issues by status (matching the same order used when
+  // grouping by status) so epic/assignee groups read like a mini status board.
+  for (const group of buckets.values()) {
+    group.issues.sort(
+      (a, b) => statusNameRank(a.status.name, statusOrder) - statusNameRank(b.status.name, statusOrder),
+    );
+  }
   return [...buckets.values()].sort(
     (a, b) =>
       orderFor(a, key, statusOrder) - orderFor(b, key, statusOrder) ||
@@ -74,6 +81,10 @@ import { statusRank } from './status';
 function orderFor(group: Group, key: GroupKey, statusOrder: string[]): number {
   if (key !== 'status') return 0;
   const name = group.issues[0]?.status.name ?? '';
+  return statusNameRank(name, statusOrder);
+}
+
+function statusNameRank(name: string, statusOrder: string[]): number {
   // Favorite statuses (configured order) win; statuses not listed fall back to
   // the built-in rank and sort after the favorites.
   if (statusOrder.length > 0) {

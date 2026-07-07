@@ -57,7 +57,7 @@ export function IntroDialog({ onImported, onStartFromScratch }: Props) {
             }}
             rows={10}
             spellCheck={false}
-            placeholder={'{\n  "projectKey": "CSP",\n  "favoriteProductDomains": [ … ]\n}'}
+            placeholder={'{\n  "projectKeys": ["CSP"],\n  "favoriteProductDomains": [ … ]\n}'}
           />
           {error && (
             <div className="taco-cell-error" style={{ marginTop: 8 }}>

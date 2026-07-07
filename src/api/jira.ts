@@ -404,6 +404,30 @@ export class JiraClient {
     };
   }
 
+  // Resolve an attachment's Media Services file id so it can be embedded inline
+  // (an ADF `media` node needs the media UUID, NOT the numeric attachment id).
+  // The attachment content endpoint 302s to a media URL of the shape
+  // `https://api.media.atlassian.com/file/<uuid>/binary?...&collection=<name>`;
+  // fetch follows the redirect transparently and `res.url` exposes the final URL.
+  // We only need the URL, so the body is cancelled rather than downloaded.
+  async getAttachmentMedia(
+    attachmentId: string,
+  ): Promise<{ id: string; collection: string } | null> {
+    try {
+      const res = await fetch(
+        `${this.origin}/rest/api/3/attachment/content/${encodeURIComponent(attachmentId)}`,
+        { credentials: 'include', headers: { Range: 'bytes=0-0' } },
+      );
+      res.body?.cancel();
+      const m = /\/file\/([0-9a-f-]{36})\b/i.exec(res.url);
+      if (!m) return null;
+      const collection = new URL(res.url).searchParams.get('collection') ?? '';
+      return { id: m[1], collection };
+    } catch {
+      return null;
+    }
+  }
+
   async searchIssuesForPicker(
     query: string,
     projectKey: string,
